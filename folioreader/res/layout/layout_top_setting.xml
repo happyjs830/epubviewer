@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <!-- 기본설정 영역 -->
+    <RelativeLayout
+        android:id="@+id/ll_top_setting"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        android:background="@color/layout_top_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- 글꼴 -->
+        <RelativeLayout
+            android:id="@+id/ll_setting_font_style"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_font_style" />
+
+            <Spinner
+                android:id="@+id/spinner_font"
+                android:layout_width="244dp"
+                android:layout_height="34dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginVertical="7dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="16dp"/>
+        </RelativeLayout>
+
+        <!-- 크기 -->
+        <RelativeLayout
+            android:id="@+id/ll_setting_font_size"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_below="@+id/ll_setting_font_style"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_font_size" />
+
+            <RelativeLayout
+                android:layout_width="244dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginVertical="10dp"
+                android:layout_marginEnd="16dp">
+
+                <ImageButton
+                    android:id="@+id/btnFontSizeMinus"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/custom_button_round_square"
+                    android:src="@drawable/ic_minus"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    tools:ignore="ContentDescription" />
+
+                <Button
+                    android:id="@+id/tvFontSizeMinus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="15pt"
+                    android:textSize="13dp"
+                    android:background="@android:color/transparent"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/btnFontSizeMinus"
+                    android:layout_toStartOf="@id/tvFontSizeCenter"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="25dp"
+                    android:textColor="@color/layout_setting_value_text_color"/>
+
+                <TextView
+                    android:id="@+id/tvFontSizeCenter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="16pt"
+                    android:textSize="14dp"
+                    android:textStyle="bold"
+                    android:background="@android:color/transparent"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/layout_setting_value_text_bold_color"
+                    android:layout_centerInParent="true"/>
+
+                <Button
+                    android:id="@+id/tvFontSizePlus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="15pt"
+                    android:textSize="13dp"
+                    android:background="@android:color/transparent"
+                    android:layout_toStartOf="@id/btnFontSizePlus"
+                    android:layout_toEndOf="@id/tvFontSizeCenter"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="25dp"
+                    android:textColor="@color/layout_setting_value_text_color"/>
+
+                <ImageButton
+                    android:id="@+id/btnFontSizePlus"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/custom_button_round_square"
+                    android:src="@drawable/ic_plus"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    tools:ignore="ContentDescription" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <!-- 줄간격 -->
+        <RelativeLayout
+            android:id="@+id/ll_setting_font_line_space"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_below="@+id/ll_setting_font_size"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_font_line_space" />
+
+            <RelativeLayout
+                android:layout_width="244dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginVertical="10dp"
+                android:layout_marginEnd="16dp">
+
+                <ImageButton
+                    android:id="@+id/btnFontLineSpaceMinus"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/custom_button_round_square"
+                    android:src="@drawable/ic_minus"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    tools:ignore="ContentDescription" />
+
+                <Button
+                    android:id="@+id/tvFontLineSpaceMinus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="15pt"
+                    android:textSize="13dp"
+                    android:background="@android:color/transparent"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/btnFontLineSpaceMinus"
+                    android:layout_toStartOf="@id/tvFontLineSpaceCenter"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="25dp"
+                    android:textColor="@color/layout_setting_value_text_color"/>
+
+                <TextView
+                    android:id="@+id/tvFontLineSpaceCenter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="16pt"
+                    android:textSize="14dp"
+                    android:textStyle="bold"
+                    android:background="@android:color/transparent"
+                    android:textColor="@color/layout_setting_value_text_bold_color"
+                    android:layout_centerInParent="true"/>
+
+                <Button
+                    android:id="@+id/tvFontLineSpacePlus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="15pt"
+                    android:textSize="13dp"
+                    android:background="@android:color/transparent"
+                    android:layout_toStartOf="@id/btnFontLineSpacePlus"
+                    android:layout_toEndOf="@id/tvFontLineSpaceCenter"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="25dp"
+                    android:textColor="@color/layout_setting_value_text_color"/>
+
+                <ImageButton
+                    android:id="@+id/btnFontLineSpacePlus"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/custom_button_round_square"
+                    android:src="@drawable/ic_plus"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    tools:ignore="ContentDescription" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <!-- 좌우여백 -->
+        <RelativeLayout
+            android:id="@+id/ll_setting_font_white_space"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_below="@+id/ll_setting_font_line_space"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_font_white_space" />
+
+            <RelativeLayout
+                android:layout_width="244dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginVertical="10dp"
+                android:layout_marginEnd="16dp">
+
+                <ImageButton
+                    android:id="@+id/btnFontWhiteSpaceMinus"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/custom_button_round_square"
+                    android:src="@drawable/ic_minus"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    tools:ignore="ContentDescription" />
+
+                <Button
+                    android:id="@+id/tvFontWhiteSpaceMinus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="1"
+                    android:textSize="13dp"
+                    android:background="@android:color/transparent"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/btnFontWhiteSpaceMinus"
+                    android:layout_toStartOf="@id/tvFontWhiteSpaceCenter"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="25dp"
+                    android:textColor="@color/layout_setting_value_text_color"/>
+
+                <TextView
+                    android:id="@+id/tvFontWhiteSpaceCenter"
+                    android:layout_width="30dp"
+                    android:layout_height="20dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="2"
+                    android:textSize="14dp"
+                    android:textStyle="bold"
+                    android:background="@android:color/transparent"
+                    android:gravity="center"
+                    android:textColor="@color/layout_setting_value_text_bold_color"
+                    android:layout_centerInParent="true"/>
+
+                <Button
+                    android:id="@+id/tvFontWhiteSpacePlus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:text="3"
+                    android:textSize="13dp"
+                    android:background="@android:color/transparent"
+                    android:layout_toStartOf="@id/btnFontWhiteSpacePlus"
+                    android:layout_toEndOf="@id/tvFontWhiteSpaceCenter"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="25dp"
+                    android:textColor="@color/layout_setting_value_text_color"/>
+
+                <ImageButton
+                    android:id="@+id/btnFontWhiteSpacePlus"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/custom_button_round_square"
+                    android:src="@drawable/ic_plus"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    tools:ignore="ContentDescription" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <!-- 문단정렬 -->
+        <RelativeLayout
+            android:id="@+id/ll_setting_alignment"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_below="@+id/ll_setting_font_white_space"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_alignment" />
+
+            <RelativeLayout
+                android:layout_width="244dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginVertical="10dp"
+                android:layout_marginEnd="16dp">
+
+                <Button
+                    android:id="@+id/alignment_left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:drawableStart="@drawable/custom_icon_alignment_left"
+                    android:text="@string/layout_setting_alignment_left"
+                    android:textSize="14dp"
+                    android:background="@android:color/transparent"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    android:textColor="@drawable/custom_bottom_button_color"/>
+
+                <Button
+                    android:id="@+id/alignment_both"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:drawableStart="@drawable/custom_icon_alignment_both"
+                    android:text="@string/layout_setting_alignment_both"
+                    android:textSize="14dp"
+                    android:background="@android:color/transparent"
+                    android:layout_marginStart="19dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/alignment_left"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    android:textColor="@drawable/custom_bottom_button_color"/>
+            </RelativeLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <!-- 상세설정 영역 -->
+    <RelativeLayout
+        android:id="@+id/ll_top_setting_detail"
+        android:layout_width="match_parent"
+        android:layout_height="144dp"
+        android:background="@color/layout_top_background"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_top_setting">
+
+        <!-- 페이지 -->
+        <RelativeLayout
+            android:id="@+id/ll_setting_page"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_page" />
+
+            <RelativeLayout
+                android:layout_width="244dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginVertical="10dp"
+                android:layout_marginEnd="16dp">
+
+                <Button
+                    android:id="@+id/page_tb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:drawableStart="@drawable/custom_icon_page_tb"
+                    android:text="@string/layout_setting_page_tb"
+                    android:textSize="14dp"
+                    android:background="@android:color/transparent"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    android:textColor="@drawable/custom_bottom_button_color"/>
+
+                <Button
+                    android:id="@+id/page_lr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:drawableStart="@drawable/custom_icon_page_lr"
+                    android:text="@string/layout_setting_page_lr"
+                    android:textSize="14dp"
+                    android:background="@android:color/transparent"
+                    android:layout_marginStart="16dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/page_tb"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    android:textColor="@drawable/custom_bottom_button_color"/>
+
+                <Button
+                    android:id="@+id/page_scroll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:drawableStart="@drawable/custom_icon_page_scroll"
+                    android:text="@string/layout_setting_page_scroll"
+                    android:textSize="14dp"
+                    android:background="@android:color/transparent"
+                    android:layout_marginStart="16dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/page_lr"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentBottom="true"
+                    android:textColor="@drawable/custom_bottom_button_color"/>
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <!-- 넘김효과 -->
+        <!--
+        <RelativeLayout
+            android:id="@+id/ll_setting_effect"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:layout_below="@+id/ll_setting_page"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_effect" />
+
+            <Spinner
+                android:id="@+id/spinner_effect"
+                android:layout_width="244dp"
+                android:layout_height="34dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginVertical="7dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="16dp"/>
+        </RelativeLayout>
+        -->
+
+        <!-- 테마 -->
+        <RelativeLayout
+            android:id="@+id/ll_setting_theme"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:layout_below="@+id/ll_setting_page"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_theme" />
+
+            <RelativeLayout
+                android:layout_width="244dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="16dp">
+
+                <ImageView
+                    android:id="@+id/btnThemeWhite"
+                    style="@style/MenuSettingThemeImageViewStyle"
+                    android:src="@drawable/custom_selector_theme_white"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    style="@style/MenuSettingThemeTextViewStyle"
+                    android:layout_alignStart="@id/btnThemeWhite"
+                    android:layout_alignTop="@id/btnThemeWhite"
+                    android:layout_alignEnd="@id/btnThemeWhite"
+                    android:layout_alignBottom="@id/btnThemeWhite"
+                    android:textColor="#697383" />
+
+                <ImageView
+                    android:id="@+id/btnThemeGray"
+                    style="@style/MenuSettingThemeImageViewStyle"
+                    android:layout_toEndOf="@id/btnThemeWhite"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/custom_selector_theme_gray"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    style="@style/MenuSettingThemeTextViewStyle"
+                    android:layout_alignStart="@id/btnThemeGray"
+                    android:layout_alignTop="@id/btnThemeGray"
+                    android:layout_alignEnd="@id/btnThemeGray"
+                    android:layout_alignBottom="@id/btnThemeGray"
+                    android:textColor="#404551" />
+
+                <ImageView
+                    android:id="@+id/btnThemeGreen"
+                    style="@style/MenuSettingThemeImageViewStyle"
+                    android:layout_toEndOf="@id/btnThemeGray"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/custom_selector_theme_green"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    style="@style/MenuSettingThemeTextViewStyle"
+                    android:layout_alignStart="@id/btnThemeGreen"
+                    android:layout_alignTop="@id/btnThemeGreen"
+                    android:layout_alignEnd="@id/btnThemeGreen"
+                    android:layout_alignBottom="@id/btnThemeGreen"
+                    android:textColor="#404551" />
+
+                <ImageView
+                    android:id="@+id/btnThemeWood"
+                    style="@style/MenuSettingThemeImageViewStyle"
+                    android:layout_toEndOf="@id/btnThemeGreen"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/custom_selector_theme_wood"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    style="@style/MenuSettingThemeTextViewStyle"
+                    android:layout_alignStart="@id/btnThemeWood"
+                    android:layout_alignTop="@id/btnThemeWood"
+                    android:layout_alignEnd="@id/btnThemeWood"
+                    android:layout_alignBottom="@id/btnThemeWood"
+                    android:textColor="#73907F" />
+
+                <ImageView
+                    android:id="@+id/btnThemeBlack"
+                    style="@style/MenuSettingThemeImageViewStyle"
+                    android:layout_toEndOf="@id/btnThemeWood"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/custom_selector_theme_black"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    style="@style/MenuSettingThemeTextViewStyle"
+                    android:layout_alignStart="@id/btnThemeBlack"
+                    android:layout_alignTop="@id/btnThemeBlack"
+                    android:layout_alignEnd="@id/btnThemeBlack"
+                    android:layout_alignBottom="@id/btnThemeBlack"
+                    android:textColor="#73907F" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <!-- 밝기 -->
+        <RelativeLayout
+            android:id="@+id/ll_setting_brightness"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_below="@+id/ll_setting_theme"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                android:id="@+id/txtBrightness"
+                style="@style/MenuSettingTitleTextViewStyle"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:text="@string/layout_setting_brightness" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/layout_setting_night_mode"
+                android:textSize="9dp"
+                android:textColor="@color/layout_setting_brightness_comment_color"
+                android:layout_below="@id/txtBrightness"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="2dp"/>
+
+            <RelativeLayout
+                android:layout_width="244dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="16dp">
+
+                <SeekBar
+                    android:id="@+id/brightness_seekbar"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:max="100"
+                    android:splitTrack="false"
+                    android:progress="100"
+                    android:padding="0dp"
+                    android:progressTint="@color/layout_setting_value_selected_text_color"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:thumb="@drawable/custom_icon_seekbar_thumb"/>
+
+                <ImageButton
+                    android:id="@+id/btnBlueFilter"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:background="@drawable/custom_button_screen_filter_parent"
+                    android:src="@drawable/custom_button_screen_filter"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <!-- 상세설정 영역 -->
+    <RelativeLayout
+        android:id="@+id/ll_top_setting_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:background="@drawable/custom_layer_bottom_round"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_top_setting_detail">
+
+        <Button
+            android:id="@+id/btnLayerExpand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:drawableStart="@drawable/custom_button_setting_close"
+            android:text="@string/layout_setting_detail_open"
+            android:textSize="12dp"
+            android:background="@android:color/transparent"
+            android:layout_centerInParent="true"
+            android:textColor="@color/layout_setting_open_close"/>
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

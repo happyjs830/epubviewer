@@ -4,7 +4,6 @@ import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -30,18 +29,18 @@ class FolioSearchView : SearchView {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     fun init(componentName: ComponentName, config: Config) {
-        Log.v(LOG_TAG, "-> init")
+//        Log.e(LOG_TAG, "-> init")
 
         val searchManager: SearchManager = context.getSystemService(Context.SEARCH_SERVICE) as SearchManager
         setSearchableInfo(searchManager.getSearchableInfo(componentName))
         setIconifiedByDefault(false)
 
-        adjustLayout()
-        applyTheme(config)
+//        adjustLayout()
+//        applyTheme(config)
     }
 
     private fun adjustLayout() {
-        Log.v(LOG_TAG, "-> adjustLayout")
+//        Log.e(LOG_TAG, "-> adjustLayout")
 
         // Hide searchHintIcon
         val searchMagIcon: View = findViewById(R.id.search_mag_icon)
@@ -53,7 +52,7 @@ class FolioSearchView : SearchView {
     }
 
     private fun applyTheme(config: Config) {
-        Log.v(LOG_TAG, "-> applyTheme")
+//        Log.e(LOG_TAG, "-> applyTheme")
 
         val searchCloseButton: ImageView = findViewById(R.id.search_close_btn)
         UiUtil.setColorIntToDrawable(config.themeColor, searchCloseButton.drawable)
@@ -68,13 +67,5 @@ class FolioSearchView : SearchView {
         } else {
             searchAutoComplete.setHintTextColor(ContextCompat.getColor(context, R.color.edit_text_hint_color))
         }
-    }
-
-    fun setDayMode() {
-        searchAutoComplete.setTextColor(ContextCompat.getColor(context, R.color.black))
-    }
-
-    fun setNightMode() {
-        searchAutoComplete.setTextColor(ContextCompat.getColor(context, R.color.white))
     }
 }

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="114dp"
+    android:background="@color/white"
+    android:id="@+id/item_bookmark">
+
+    <CheckBox
+        android:id="@+id/btn_check"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:button="@android:color/transparent"
+        android:background="@drawable/custom_button_checkbox"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/textViewContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:maxLines="3"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="15.25dp"
+        android:layout_marginEnd="16.75dp"
+        android:textSize="13dp"
+        android:textColor="@color/layout_search_result_title_color"
+        android:gravity="start"
+        android:ellipsize="end"
+        app:layout_constraintStart_toEndOf="@id/btn_check"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기" />
+
+    <TextView
+        android:id="@+id/textViewDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:layout_marginStart="16.5dp"
+        android:layout_marginBottom="16dp"
+        android:textSize="12dp"
+        android:textColor="#97A7BC"
+        android:includeFontPadding="false"
+        app:layout_constraintStart_toEndOf="@id/btn_check"
+        app:layout_constraintBottom_toTopOf="@id/line_bottom"
+        tools:text="YYYY-MM-DD" />
+
+    <View
+        android:id="@+id/devide1"
+        android:layout_width="1dp"
+        android:layout_height="10dp"
+        android:layout_gravity="center"
+        android:background="#97A7BC"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12.5dp"
+        android:layout_marginBottom="18dp"
+        app:layout_constraintStart_toEndOf="@id/textViewDate"
+        app:layout_constraintBottom_toTopOf="@id/line_bottom"/>
+
+    <TextView
+        android:id="@+id/textViewPage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textSize="12dp"
+        android:textColor="#97A7BC"
+        android:includeFontPadding="false"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintStart_toEndOf="@id/devide1"
+        app:layout_constraintBottom_toTopOf="@id/line_bottom"
+        tools:text="71페이지" />
+
+    <View
+        android:id="@+id/devide2"
+        android:layout_width="1dp"
+        android:layout_height="10dp"
+        android:layout_gravity="center"
+        android:background="#97A7BC"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12.5dp"
+        android:layout_marginBottom="18dp"
+        app:layout_constraintStart_toEndOf="@id/textViewPage"
+        app:layout_constraintBottom_toTopOf="@id/line_bottom"/>
+
+    <TextView
+        android:id="@+id/textViewChapter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textSize="12dp"
+        android:textColor="#97A7BC"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintStart_toEndOf="@id/devide2"
+        app:layout_constraintBottom_toTopOf="@id/line_bottom"
+        tools:text="챕터명" />
+
+    <View
+        android:id="@+id/line_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="center"
+        android:background="#DBDFE4"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

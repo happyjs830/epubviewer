@@ -162,15 +162,6 @@ input, textarea, button, highlight, select, a {
 }
 
 /* Highlight styles */
-html .highlight_yellow {background:rgb(255, 235, 107)}
-html .highlight_green {background:#C0ED72}
-html .highlight_blue {background:#ADD8FF}
-html .highlight_pink {background:#FFB0CA}
-html .highlight_underline {
-    text-decoration: none;
-    border-bottom: 2px solid #F02814;
-}
-
 html .highlight_yellow, html .highlight_green, html .highlight_blue, html .highlight_pink, span.epub-media-overlay-playing {
     border-radius: 3px;
     padding: 0 2px;
@@ -203,25 +194,25 @@ body {
     background-color: transparent !important;
 }
 
-html.nightMode {
-    background-color: #131313 !important;
-}
+html.theme-white { background-color: #FFFFFF !important; }
+html.theme-white .highlight_yellow { background:#5AACFF33 !important; }
+html.theme-white p, html.theme-white h1, html.theme-white h2, html.theme-white h3, html.theme-white h4, html.theme-white h5, html.theme-white h6 { color: #697383 !important; }
 
-.nightMode p, .nightMode div {
-    color: #767676 !important;
-    background-color: transparent !important;
-}
+html.theme-gray { background-color: #EAEDF0 !important; }
+html.theme-gray .highlight_yellow { background:#5AACFF40 !important; }
+html.theme-gray p, html.theme-gray h1, html.theme-gray h2, html.theme-gray h3, html.theme-gray h4, html.theme-gray h5, html.theme-gray h6 { color: #404551 !important; }
 
-.nightMode h1, .nightMode h2, .nightMode h3, .nightMode h4, .nightMode h5, .nightMode h6 {
-    color: #848484 !important;
-}
+html.theme-green { background-color: #D4EFC1 !important; }
+html.theme-green .highlight_yellow { background:#0C9A004D !important; }
+html.theme-green p, html.theme-green h1, html.theme-green h2, html.theme-green h3, html.theme-green h4, html.theme-green h5, html.theme-green h6 { color: #404551 !important; }
 
-html.nightMode .highlight_yellow {background:rgba(255, 235, 107, 0.9)}
-html.nightMode .highlight_green {background:rgba(192, 237, 114, 0.9)}
-html.nightMode .highlight_blue {background:rgba(173, 216, 255, 0.9)}
-html.nightMode .highlight_pink {background:rgba(255, 176, 202, 0.9)}
-html.nightMode .highlight_underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
+html.theme-wood { background-color: #192C17 !important; }
+html.theme-wood .highlight_yellow { background:#5AFFE640 !important; }
+html.theme-wood p, html.theme-wood h1, html.theme-wood h2, html.theme-wood h3, html.theme-wood h4, html.theme-wood h5, html.theme-wood h6 { color: #73907F !important; }
 
+html.theme-black { background-color: #22242A !important; }
+html.theme-black .highlight_yellow { background:#52A8F252 !important; }
+html.theme-black p, html.theme-black h1, html.theme-black h2, html.theme-black h3, html.theme-black h4, html.theme-black h5, html.theme-black h6 { color: #97A7BC !important; }
 
 /*
  *
@@ -249,6 +240,21 @@ html.nightMode .highlight_underline {border-bottom: 2px solid rgba(240, 40, 20, 
     src: url('file:///android_asset/fonts/raleway/Raleway-Regular.ttf');
 }
 
+@font-face {
+    font-family: 'nanum_gothic';
+    src: url('file:///android_asset/fonts/nanum_gothic.ttf');
+}
+
+@font-face {
+    font-family: 'nanum_myeongjo';
+    src: url('file:///android_asset/fonts/nanum_myeongjo.ttf');
+}
+
+@font-face {
+    font-family: 'notoserif_regular';
+    src: url('file:///android_asset/fonts/notoserif_regular.ttf');
+}
+
 .andada {
      font-family: "andada", sans-serif;
  }
@@ -261,12 +267,69 @@ html.nightMode .highlight_underline {border-bottom: 2px solid rgba(240, 40, 20, 
 .raleway {
      font-family: "raleway", sans-serif;
  }
+.nanum_gothic {
+      font-family: "nanum_gothic", sans-serif;
+  }
+.nanum_myeongjo {
+   font-family: "nanum_myeongjo", sans-serif;
+}
+.notoserif_regular {
+    font-family: "notoserif_regular", sans-serif;
+}
 
-html.textSizeOne { font-size: 13px !important; }
-html.textSizeTwo { font-size: 15px !important; }
-html.textSizeThree { font-size: 17px !important; }
-html.textSizeFour { font-size: 19px !important; }
-html.textSizeFive { font-size: 21px !important; }
+.textSizeOne * { font-size: 9px ; }
+.textSizeOnePlus * { font-size: 10px ; }
+.textSizeTwo * { font-size: 11px ; }
+.textSizeTwoPlus * { font-size: 12px ; }
+.textSizeThree * { font-size: 13px ; }
+.textSizeThreePlus * { font-size: 14px ; }
+.textSizeFour * { font-size: 15px ; }
+.textSizeFourPlus * { font-size: 16px ; }
+.textSizeFive * { font-size: 17px ; }
+.textSizeFivePlus * { font-size: 18px ; }
+.textSizeSix * { font-size: 19px ; }
+.textSizeSixPlus * { font-size: 20px ; }
+.textSizeSeven * { font-size: 21px ; }
+.textSizeSevenPlus * { font-size: 22px ; }
+.textSizeEight * { font-size: 23px ; }
+.textSizeEightPlus * { font-size: 24px ; }
+.textSizeNine * { font-size: 25px ; }
+.textSizeNinePlus * { font-size: 26px ; }
+.textSizeTen * { font-size: 27px ; }
+.textSizeTenPlus * { font-size: 28px ; }
+
+.textLineHeightOne * { line-height: 0% !important; }
+.textLineHeightOnePlus * { line-height: 10% !important; }
+.textLineHeightTwo * { line-height: 20% !important; }
+.textLineHeightTwoPlus * { line-height: 30% !important; }
+.textLineHeightThree * { line-height: 40% !important; }
+.textLineHeightThreePlus * { line-height: 50% !important; }
+.textLineHeightFour * { line-height: 60% !important; }
+.textLineHeightFourPlus * { line-height: 70% !important; }
+.textLineHeightFive * { line-height: 80% !important; }
+.textLineHeightFivePlus * { line-height: 90% !important; }
+.textLineHeightSix * { line-height: 100% !important; }
+.textLineHeightSixPlus * { line-height: 110% !important; }
+.textLineHeightSeven * { line-height: 120% !important; }
+.textLineHeightSevenPlus * { line-height: 130% !important; }
+.textLineHeightEight * { line-height: 140% !important; }
+.textLineHeightEightPlus * { line-height: 150% !important; }
+.textLineHeightNine * { line-height: 160% !important; }
+.textLineHeightNinePlus * { line-height: 170% !important; }
+.textLineHeightTen * { line-height: 180% !important; }
+.textLineHeightTenPlus * { line-height: 190% !important; }
+.textLineHeightLast * { line-height: 200% !important; }
+
+.textMarginOne * { margin: 0 0 !important; }
+.textMarginTwo * { margin: 0 2px !important; }
+.textMarginThree * { margin: 0 4px !important; }
+.textMarginFour * { margin: 0 6px !important; }
+.textMarginFive * { margin: 0 8px !important; }
+.textMarginSix * { margin: 0 10px !important; }
+.textMarginSeven * { margin: 0 12px !important; }
+
+.textAlignmentLeft * { text-align: left !important; }
+.textAlignmentBoth * { text-align: justify !important; }
 
 h1 {
     font-size: 2rem;

@@ -21,7 +21,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+//import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Config
 import com.folioreader.FolioReader
 import com.folioreader.R
@@ -42,6 +42,7 @@ import com.folioreader.ui.view.LoadingView
 import com.folioreader.ui.view.VerticalSeekbar
 import com.folioreader.ui.view.WebViewPager
 import com.folioreader.util.AppUtil
+import com.folioreader.util.BookmarkUtil
 import com.folioreader.util.HighlightUtil
 import com.folioreader.util.UiUtil
 import org.greenrobot.eventbus.EventBus
@@ -84,7 +85,6 @@ class FolioPageFragment : Fragment(),
 
     private lateinit var uiHandler: Handler
     private var mHtmlString: String? = null
-    private val hasMediaOverlay = false
     private var mAnchorId: String? = null
     private var rangy = ""
     private var highlightId: String? = null
@@ -118,6 +118,7 @@ class FolioPageFragment : Fragment(),
     private var mConfig: Config? = null
     private var mBookId: String? = null
     var searchLocatorVisible: SearchLocator? = null
+    private var mCurrentPage: Int? = null
 
     private lateinit var chapterUrl: Uri
 
@@ -243,8 +244,8 @@ class FolioPageFragment : Fragment(),
         if (isAdded) {
             mWebview!!.dismissPopupWindow()
             mWebview!!.initViewTextSelection()
-            loadingView!!.updateTheme()
-            loadingView!!.show()
+//            loadingView!!.updateTheme()
+//            loadingView!!.show()
             mIsPageReloaded = true
             setHtml(true)
             updatePagesLeftTextBg()
@@ -319,9 +320,7 @@ class FolioPageFragment : Fragment(),
             uiHandler.post {
                 mWebview!!.loadDataWithBaseURL(
                     mActivityCallback?.streamerUrl + path,
-                    HtmlUtil.getHtmlContent(mWebview!!.context, mHtmlString, mConfig!!),
-                    mimeType,
-                    "UTF-8", null
+                    HtmlUtil.getHtmlContent(mWebview!!.context, mHtmlString, mConfig!!), mimeType, "UTF-8", null
                 )
             }
         }
@@ -610,7 +609,7 @@ class FolioPageFragment : Fragment(),
 
             val intent = Intent(FolioReader.ACTION_SAVE_READ_LOCATOR)
             intent.putExtra(FolioReader.EXTRA_READ_LOCATOR, lastReadLocator as Parcelable?)
-            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+//            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
 
             (this as java.lang.Object).notify()
         }
@@ -666,6 +665,7 @@ class FolioPageFragment : Fragment(),
     private fun updatePagesLeftText(scrollY: Int) {
         try {
             val currentPage = (Math.ceil(scrollY.toDouble() / mWebview!!.webViewHeight) + 1).toInt()
+            mCurrentPage = currentPage
             val totalPages = Math.ceil(mWebview!!.contentHeightVal.toDouble() / mWebview!!.webViewHeight).toInt()
             val pagesRemaining = totalPages - currentPage
             val pagesRemainingStrFormat = if (pagesRemaining > 1)
@@ -700,7 +700,6 @@ class FolioPageFragment : Fragment(),
         } catch (exp: IllegalStateException) {
             Log.e("divide error", exp.toString())
         }
-
     }
 
     private fun initAnimations() {
@@ -769,6 +768,14 @@ class FolioPageFragment : Fragment(),
         outState.putParcelable(BUNDLE_SEARCH_LOCATOR, searchLocatorVisible)
     }
 
+    fun bookmark() {
+        mWebview!!.loadUrl(
+            String.format(
+                "javascript:if(typeof ssReader !== \"undefined\"){ssReader.bookmark();}"
+            )
+        )
+    }
+
     fun highlight(style: HighlightImpl.HighlightStyle, isAlreadyCreated: Boolean) {
         if (!isAlreadyCreated) {
             mWebview!!.loadUrl(
@@ -794,16 +801,20 @@ class FolioPageFragment : Fragment(),
     }
 
     @JavascriptInterface
+    fun onReceiveBookmark(html: String?) {
+        if (html != null) {
+//            rangy = BookmarkUtil.createBookmarkRangy(activity!!.applicationContext, html, mBookId, pageName, spineIndex, rangy)
+            Log.e(LOG_TAG, "mCurrentPage : $mCurrentPage")
+            rangy = BookmarkUtil.createBookmarkRangy(activity!!.applicationContext, html, mBookId, pageName, mCurrentPage!!, rangy)
+        }
+    }
+
+    @JavascriptInterface
     fun onReceiveHighlights(html: String?) {
         if (html != null) {
-            rangy = HighlightUtil.createHighlightRangy(
-                activity!!.applicationContext,
-                html,
-                mBookId,
-                pageName,
-                spineIndex,
-                rangy
-            )
+//            rangy = HighlightUtil.createHighlightRangy(activity!!.applicationContext, html, mBookId, pageName, spineIndex, rangy)
+            Log.e(LOG_TAG, "mCurrentPage : $mCurrentPage")
+            rangy = HighlightUtil.createHighlightRangy(activity!!.applicationContext, html, mBookId, pageName, mCurrentPage!!, rangy)
         }
     }
 
@@ -828,7 +839,6 @@ class FolioPageFragment : Fragment(),
             }
             val rangyString = HighlightUtil.generateRangyString(pageName)
             activity!!.runOnUiThread { loadRangy(rangyString) }
-
         }
     }
 

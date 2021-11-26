@@ -51,6 +51,7 @@
         <item name="underlineIconFillColorTop">@color/day_underline_icon_fill_color_top</item>
 
         <item name="scrollBarColor">@color/day_scroll_bar_color</item>
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
 
     </style>
 

@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity
-        implements OnHighlightListener, ReadLocatorListener, FolioReader.OnClosedListener {
+        implements OnHighlightListener, ReadLocatorListener, FolioReader.OnClosedListener, View.OnClickListener {
 
     private static final String LOG_TAG = HomeActivity.class.getSimpleName();
     private FolioReader folioReader;
@@ -50,47 +50,17 @@ public class HomeActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        folioReader = FolioReader.get()
-                .setOnHighlightListener(this)
-                .setReadLocatorListener(this)
-                .setOnClosedListener(this);
+        folioReader = FolioReader.get().setOnHighlightListener(this).setReadLocatorListener(this).setOnClosedListener(this);
 
         getHighlightsAndSave();
 
-        findViewById(R.id.btn_raw).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Config config = AppUtil.getSavedConfig(getApplicationContext());
-                if (config == null)
-                    config = new Config();
-                config.setAllowedDirection(Config.AllowedDirection.VERTICAL_AND_HORIZONTAL);
-
-                folioReader.setConfig(config, true)
-                        .openBook(R.raw.accessible_epub_3);
-            }
-        });
-
-        findViewById(R.id.btn_assest).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                ReadLocator readLocator = getLastReadLocator();
-
-                Config config = AppUtil.getSavedConfig(getApplicationContext());
-                if (config == null)
-                    config = new Config();
-                config.setAllowedDirection(Config.AllowedDirection.VERTICAL_AND_HORIZONTAL);
-
-                folioReader.setReadLocator(readLocator);
-                folioReader.setConfig(config, true)
-                        .openBook("file:///android_asset/TheSilverChair.epub");
-            }
-        });
+        findViewById(R.id.sample).setOnClickListener(this);
+        findViewById(R.id.sample2).setOnClickListener(this);
+        findViewById(R.id.sample3).setOnClickListener(this);
+        findViewById(R.id.the_silver_chair).setOnClickListener(this);
     }
 
     private ReadLocator getLastReadLocator() {
-
         String jsonString = loadAssetTextAsString("Locators/LastReadLocators/last_read_locator_1.json");
         return ReadLocator.fromJson(jsonString);
     }
@@ -120,7 +90,7 @@ public class HomeActivity extends AppCompatActivity
                 }
 
                 if (highlightList == null) {
-                    folioReader.saveReceivedHighLights(highlightList, new OnSaveHighlight() {
+                    folioReader.saveReceivedHighLights(null, new OnSaveHighlight() {
                         @Override
                         public void onFinished() {
                             //You can do anything on successful saving highlight list
@@ -178,5 +148,30 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onFolioReaderClosed() {
         Log.v(LOG_TAG, "-> onFolioReaderClosed");
+    }
+
+    @Override
+    public void onClick(View v) {
+        Config config = AppUtil.getSavedConfig(getApplicationContext());
+        if (config == null)
+            config = new Config();
+        config.setAllowedDirection(Config.AllowedDirection.VERTICAL_AND_HORIZONTAL);
+        Log.e(LOG_TAG, "getID : " + v.getId());
+
+        switch (v.getId()) {
+            case R.id.sample:
+                folioReader.setConfig(config, true).openBook(R.raw.sample);
+                break;
+            case R.id.sample2:
+                folioReader.setConfig(config, true).openBook(R.raw.sample2);
+                break;
+            case R.id.sample3:
+                folioReader.setConfig(config, true).openBook(R.raw.sample3);
+                break;
+            case R.id.the_silver_chair:
+                folioReader.setConfig(config, true).openBook(R.raw.the_silver_chair);
+                break;
+        }
+
     }
 }

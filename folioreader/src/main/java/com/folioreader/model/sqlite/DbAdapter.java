@@ -33,6 +33,10 @@ public class DbAdapter {
         return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.COL_BOOK_ID + " = \"" + bookId + "\"", null);
     }
 
+    public static Cursor getBookMarksForBookId(String bookId) {
+        return mDatabase.rawQuery("SELECT * FROM " + BookmarkTable.TABLE_NAME + " WHERE " + BookmarkTable.COL_BOOK_ID + " = \"" + bookId + "\"", null);
+    }
+
     public boolean deleteAll(String table) {
         return mDatabase.delete(table, null, null) > 0;
     }
@@ -76,11 +80,19 @@ public class DbAdapter {
         return mDatabase.insert(HighLightTable.TABLE_NAME, null, highlightContentValues);
     }
 
+    public static long saveBookMark(ContentValues bookmarkContentValues) {
+        return mDatabase.insert(BookmarkTable.TABLE_NAME, null, bookmarkContentValues);
+    }
+
     public static boolean updateHighLight(ContentValues highlightContentValues, String id) {
         return mDatabase.update(HighLightTable.TABLE_NAME, highlightContentValues, HighLightTable.ID + " = " + id, null) > 0;
     }
 
     public static Cursor getHighlightsForPageId(String query, String pageId) {
+        return mDatabase.rawQuery(query, null);
+    }
+
+    public static Cursor getBookmarksForPageId(String query, String pageId) {
         return mDatabase.rawQuery(query, null);
     }
 
@@ -97,5 +109,9 @@ public class DbAdapter {
 
     public static Cursor getHighlightsForId(int id) {
         return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.ID + " = \"" + id + "\"", null);
+    }
+
+    public static Cursor getBookmarksForId(int id) {
+        return mDatabase.rawQuery("SELECT * FROM " + BookmarkTable.TABLE_NAME + " WHERE " + BookmarkTable.ID + " = \"" + id + "\"", null);
     }
 }

@@ -99,10 +99,12 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:$versions.jackson"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$versions.jackson"
     implementation "com.google.code.gson:gson:$versions.gson"
+    implementation 'androidx.viewpager2:viewpager2:1.0.0-beta04'
 
     implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
     implementation "com.squareup.retrofit2:converter-jackson:$versions.retrofit"
     implementation "com.squareup.retrofit2:converter-gson:$versions.retrofit"
+    implementation 'com.github.nawinkhatiwada:TopSheet:1.0.0-alpha2'
 
     // R2 modules
     api("com.github.codetoart:r2-shared-kotlin:$versions.r2SharedKotlin") {

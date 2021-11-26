@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+//import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.folioreader.model.HighLight;
 import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.locators.ReadLocator;
@@ -120,13 +120,10 @@ public class FolioReader {
         this.context = context;
         DbAdapter.initialize(context);
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.registerReceiver(highlightReceiver,
-                new IntentFilter(HighlightImpl.BROADCAST_EVENT));
-        localBroadcastManager.registerReceiver(readLocatorReceiver,
-                new IntentFilter(ACTION_SAVE_READ_LOCATOR));
-        localBroadcastManager.registerReceiver(closedReceiver,
-                new IntentFilter(ACTION_FOLIOREADER_CLOSED));
+//        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+//        localBroadcastManager.registerReceiver(highlightReceiver, new IntentFilter(HighlightImpl.BROADCAST_EVENT));
+//        localBroadcastManager.registerReceiver(readLocatorReceiver, new IntentFilter(ACTION_SAVE_READ_LOCATOR));
+//        localBroadcastManager.registerReceiver(closedReceiver, new IntentFilter(ACTION_FOLIOREADER_CLOSED));
     }
 
     public FolioReader openBook(String assetOrSdcardPath) {
@@ -256,7 +253,7 @@ public class FolioReader {
      */
     public void close() {
         Intent intent = new Intent(FolioReader.ACTION_CLOSE_FOLIOREADER);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+//        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     /**
@@ -290,9 +287,9 @@ public class FolioReader {
     }
 
     private void unregisterListeners() {
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.unregisterReceiver(highlightReceiver);
-        localBroadcastManager.unregisterReceiver(readLocatorReceiver);
-        localBroadcastManager.unregisterReceiver(closedReceiver);
+//        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+//        localBroadcastManager.unregisterReceiver(highlightReceiver);
+//        localBroadcastManager.unregisterReceiver(readLocatorReceiver);
+//        localBroadcastManager.unregisterReceiver(closedReceiver);
     }
 }

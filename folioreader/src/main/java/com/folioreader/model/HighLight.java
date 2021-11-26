@@ -39,6 +39,7 @@ public interface HighLight {
      * Returns Date time when highlight is created (format:- MMM dd, yyyy | HH:mm).
      */
     Date getDate();
+    long getTimeStamp();
 
     /**
      * Returns Field defines the color of the highlight.

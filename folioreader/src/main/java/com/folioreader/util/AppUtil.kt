@@ -92,6 +92,11 @@ class AppUtil {
             try {
                 obj.put(Config.CONFIG_FONT, config.font)
                 obj.put(Config.CONFIG_FONT_SIZE, config.fontSize)
+                obj.put(Config.CONFIG_FONT_LINE_SPACE, config.fontLineSpace)
+                obj.put(Config.CONFIG_FONT_WHITE_SPACE, config.fontWhiteSpace)
+                obj.put(Config.CONFIG_IS_ALIGNMENT, config.alignment)
+                obj.put(Config.CONFIG_IS_PAGE, config.pageType)
+                obj.put(Config.CONFIG_IS_THEME, config.currentTheme)
                 obj.put(Config.CONFIG_IS_NIGHT_MODE, config.isNightMode)
                 obj.put(Config.CONFIG_THEME_COLOR_INT, config.themeColor)
                 obj.put(Config.CONFIG_IS_TTS, config.isShowTts)
@@ -111,14 +116,15 @@ class AppUtil {
         fun getSavedConfig(context: Context?): Config? {
             val json = getSharedPreferencesString(context, Config.INTENT_CONFIG, null)
             if (json != null) {
-                try {
+                return try {
                     val jsonObject = JSONObject(json)
-                    return Config(jsonObject)
+                    Config(jsonObject)
                 } catch (e: JSONException) {
                     Log.e(LOG_TAG, e.message)
-                    return null
+                    null
                 }
-
+            } else {
+                Config()
             }
             return null
         }

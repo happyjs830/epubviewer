@@ -17,11 +17,11 @@ class FolioAppBarLayout : AppBarLayout {
     var navigationBarHeight: Int = 0
     var insets: Rect? = null
 
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+    constructor(context: Context?) : super(context!!)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs) {
 
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-            Log.v(LOG_TAG, "-> onApplyWindowInsets")
+            Log.e(LOG_TAG, "-> onApplyWindowInsets")
             // For API level 20 and above
 
             this.insets = Rect(
@@ -40,7 +40,7 @@ class FolioAppBarLayout : AppBarLayout {
     }
 
     override fun fitSystemWindows(insets: Rect?): Boolean {
-        Log.v(LOG_TAG, "-> fitSystemWindows")
+        Log.e(LOG_TAG, "-> fitSystemWindows")
         // For API level 19 and below
 
         this.insets = Rect(insets)
@@ -52,7 +52,6 @@ class FolioAppBarLayout : AppBarLayout {
     }
 
     private fun setMargins(left: Int, top: Int, right: Int) {
-
         val marginLayoutParams = layoutParams as MarginLayoutParams
         marginLayoutParams.leftMargin = left
         marginLayoutParams.topMargin = top

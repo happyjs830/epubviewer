@@ -20,6 +20,7 @@ public class HighLightTable {
     public static final String COL_BOOK_ID = "bookId";
     private static final String COL_CONTENT = "content";
     private static final String COL_DATE = "date";
+    private static final String COL_DATE_TS = "date_ts";
     private static final String COL_TYPE = "type";
     private static final String COL_PAGE_NUMBER = "page_number";
     private static final String COL_PAGE_ID = "pageId";
@@ -32,6 +33,7 @@ public class HighLightTable {
             + COL_BOOK_ID + " TEXT" + ","
             + COL_CONTENT + " TEXT" + ","
             + COL_DATE + " TEXT" + ","
+            + COL_DATE_TS + " TEXT" + ","
             + COL_TYPE + " TEXT" + ","
             + COL_PAGE_NUMBER + " INTEGER" + ","
             + COL_PAGE_ID + " TEXT" + ","
@@ -48,6 +50,7 @@ public class HighLightTable {
         contentValues.put(COL_BOOK_ID, highLight.getBookId());
         contentValues.put(COL_CONTENT, highLight.getContent());
         contentValues.put(COL_DATE, getDateTimeString(highLight.getDate()));
+        contentValues.put(COL_DATE_TS, highLight.getTimeStamp());
         contentValues.put(COL_TYPE, highLight.getType());
         contentValues.put(COL_PAGE_NUMBER, highLight.getPageNumber());
         contentValues.put(COL_PAGE_ID, highLight.getPageId());
@@ -57,7 +60,6 @@ public class HighLightTable {
         return contentValues;
     }
 
-
     public static ArrayList<HighlightImpl> getAllHighlights(String bookId) {
         ArrayList<HighlightImpl> highlights = new ArrayList<>();
         Cursor highlightCursor = DbAdapter.getHighLightsForBookId(bookId);
@@ -66,6 +68,7 @@ public class HighLightTable {
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_BOOK_ID)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_CONTENT)),
                     getDateTime(highlightCursor.getString(highlightCursor.getColumnIndex(COL_DATE))),
+                    highlightCursor.getLong(highlightCursor.getColumnIndex(COL_DATE_TS)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_TYPE)),
                     highlightCursor.getInt(highlightCursor.getColumnIndex(COL_PAGE_NUMBER)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_PAGE_ID)),
@@ -84,18 +87,19 @@ public class HighLightTable {
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_BOOK_ID)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_CONTENT)),
                     getDateTime(highlightCursor.getString(highlightCursor.getColumnIndex(COL_DATE))),
+                    highlightCursor.getLong(highlightCursor.getColumnIndex(COL_DATE_TS)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_TYPE)),
                     highlightCursor.getInt(highlightCursor.getColumnIndex(COL_PAGE_NUMBER)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_PAGE_ID)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_RANGY)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_NOTE)),
                     highlightCursor.getString(highlightCursor.getColumnIndex(COL_UUID)));
-
         }
         return highlightImpl;
     }
 
     public static long insertHighlight(HighlightImpl highlightImpl) {
+        Log.e(TABLE_NAME, "highlightImpl ::::: " + highlightImpl.toString());
         highlightImpl.setUUID(UUID.randomUUID().toString());
         return DbAdapter.saveHighLight(getHighlightContentValues(highlightImpl));
     }
@@ -126,8 +130,7 @@ public class HighLightTable {
     }
 
     public static String getDateTimeString(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                Constants.DATE_FORMAT, Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault());
         return dateFormat.format(date);
     }
 
@@ -158,9 +161,6 @@ public class HighLightTable {
     }
 
     private static String updateRangy(String rangy, String style) {
-        /*Pattern p = Pattern.compile("\\highlight_\\w+");
-        Matcher m = p.matcher(rangy);
-        return m.replaceAll(style);*/
         String[] s = rangy.split("\\$");
         StringBuilder builder = new StringBuilder();
         for (String p : s) {
@@ -184,12 +184,10 @@ public class HighLightTable {
 
     public static void saveHighlightIfNotExists(HighLight highLight) {
         String query = "SELECT " + ID + " FROM " + TABLE_NAME + " WHERE " + COL_UUID + " = \"" + highLight.getUUID() + "\"";
+        Log.e(TABLE_NAME, "saveHighlightIfNotExists : " + query);
         int id = DbAdapter.getIdForQuery(query);
         if (id == -1) {
             DbAdapter.saveHighLight(getHighlightContentValues(highLight));
         }
     }
 }
-
-
-

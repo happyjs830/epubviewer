@@ -32,8 +32,6 @@ class SearchViewModel : ViewModel() {
     }
 
     fun init() {
-        Log.v(LOG_TAG, "-> init")
-
         val bundle = Bundle()
         bundle.putString(ListViewType.KEY, ListViewType.INIT_VIEW.toString())
         bundle.putParcelableArrayList("DATA", ArrayList<SearchLocator>())
@@ -41,9 +39,6 @@ class SearchViewModel : ViewModel() {
     }
 
     fun search(spineSize: Int, query: String) {
-        //Log.v(LOG_TAG, "-> search")
-        Log.d(LOG_TAG, "-> search -> spineSize = $spineSize, query = $query")
-
         cancelAllSearchCalls()
 
         searchCallCount = spineSize
@@ -60,31 +55,23 @@ class SearchViewModel : ViewModel() {
     }
 
     fun cancelAllSearchCalls() {
-        Log.v(LOG_TAG, "-> cancelAllSearchCalls")
-
         searchCallList.forEach { it.cancel() }
         searchCallList.clear()
     }
 
     inner class SearchApiCallback : Callback<List<Locator>> {
         override fun onFailure(call: Call<List<Locator>>, t: Throwable) {
-            Log.e(LOG_TAG, "-> search -> onFailure", t)
-
-            val bundle = processSingleSearchResponse(call, null, t)
+            val bundle = processSingleSearchResponse(null)
             mergeSearchResponse(bundle, call)
         }
 
         override fun onResponse(call: Call<List<Locator>>, response: Response<List<Locator>>) {
-            Log.d(LOG_TAG, "-> search -> onResponse")
-
-            val bundle = processSingleSearchResponse(call, response, null)
+            val bundle = processSingleSearchResponse(response)
             mergeSearchResponse(bundle, call)
         }
     }
 
     private fun mergeSearchResponse(bundle: Bundle, call: Call<List<Locator>>) {
-        Log.v(LOG_TAG, "-> mergeSearchResponse")
-
         if (call.isCanceled)
             return
 
@@ -99,7 +86,6 @@ class SearchViewModel : ViewModel() {
             if (liveList.isEmpty()) {
                 bundle.putString(ListViewType.KEY, ListViewType.PAGINATION_IN_PROGRESS_VIEW.toString())
                 liveAdapterDataBundle.value = bundle
-
             } else {
                 val liveSearchCountItems = liveList.first().primaryContents.toInt()
                 val responseSearchCountItems = responseList.first().primaryContents.toInt()
@@ -128,10 +114,8 @@ class SearchViewModel : ViewModel() {
 
             val liveListViewType: ListViewType = if (liveList.isEmpty() && errorSearchCallCount > 0) {
                 ListViewType.FAILURE_VIEW
-
             } else if (liveList.isEmpty()) {
                 ListViewType.EMPTY_VIEW
-
             } else {
                 ListViewType.NORMAL_VIEW
             }
@@ -141,13 +125,7 @@ class SearchViewModel : ViewModel() {
         }
     }
 
-    private fun processSingleSearchResponse(
-        call: Call<List<Locator>>,
-        response: Response<List<Locator>>?,
-        t: Throwable?
-    ): Bundle {
-        Log.d(LOG_TAG, "-> processSingleSearchResponse")
-
+    private fun processSingleSearchResponse(response: Response<List<Locator>>?): Bundle {
         val locatorList = response?.body()
         return when {
             locatorList == null -> {
@@ -169,8 +147,6 @@ class SearchViewModel : ViewModel() {
     }
 
     private fun initSearchLocatorList(locatorList: MutableList<Locator>): Bundle {
-        Log.v(LOG_TAG, "-> initSearchLocatorList")
-
         val searchLocatorList: MutableList<SearchLocator> = mutableListOf()
 
         val searchCountItem = SearchLocator()
@@ -181,24 +157,14 @@ class SearchViewModel : ViewModel() {
         var resourceHref: String? = null
 
         for (locator in locatorList) {
-
             if (resourceHref != locator.href) {
                 resourceHref = locator.href
-                val titleLocator = SearchLocator()
-                titleLocator.searchItemType = SearchItemType.RESOURCE_TITLE_ITEM
-                titleLocator.primaryContents = locator.title
+                val titleLocator = SearchLocator(locator, locator.title, SearchItemType.RESOURCE_TITLE_ITEM)
                 searchLocatorList.add(titleLocator)
             }
 
-            val primaryContents = StringBuilder()
-                .append(locator.text?.before ?: "")
-                .append(locator.text?.hightlight ?: "")
-                .append(locator.text?.after ?: "")
-                .toString()
-            val searchResultItem = SearchLocator(
-                locator, primaryContents,
-                SearchItemType.SEARCH_RESULT_ITEM
-            )
+            val primaryContents = StringBuilder().append(locator.text?.before ?: "").append(locator.text?.hightlight ?: "").append(locator.text?.after ?: "").toString()
+            val searchResultItem = SearchLocator(locator, primaryContents, SearchItemType.SEARCH_RESULT_ITEM)
             searchLocatorList.add(searchResultItem)
         }
 

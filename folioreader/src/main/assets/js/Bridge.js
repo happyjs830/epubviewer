@@ -307,6 +307,17 @@ $(function () {
             $("#" + inputId).trigger("input", ["true"]);
         },
 
+        bookmark: function () {
+            try {
+                var range = window.getSelection().toString();
+                var params = {content: range, rangy: this.getHighlights()};
+                this.clearSelection();
+                Highlight.onReceiveBookmark(JSON.stringify(params));
+            } catch (err) {
+                console.log("highlightSelection : " + err);
+            }
+        },
+
         highlightSelection: function (color) {
             try {
 
@@ -808,7 +819,7 @@ function onClickHighlight(element) {
     event.stopPropagation();
     thisHighlight = element;
     var rectJson = getSelectionRect(element);
-    FolioWebView.setSelectionRect(rectJson.left, rectJson.top, rectJson.right, rectJson.bottom);
+    FolioWebView.setSelectionRect(rectJson.left, rectJson.top, rectJson.right, rectJson.bottom, true);
 }
 
 function deleteThisHighlight() {

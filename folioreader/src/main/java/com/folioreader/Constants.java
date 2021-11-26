@@ -10,6 +10,7 @@ public class Constants {
     public static final String SELECTED_CHAPTER_POSITION = "selected_chapter_position";
     public static final String TYPE = "type";
     public static final String CHAPTER_SELECTED = "chapter_selected";
+    public static final String BOOKMARK_SELECTED = "bookmark_selected";
     public static final String HIGHLIGHT_SELECTED = "highlight_selected";
     public static final String BOOK_TITLE = "book_title";
 
@@ -25,6 +26,9 @@ public class Constants {
     public static final int FONT_LATO = 2;
     public static final int FONT_LORA = 3;
     public static final int FONT_RALEWAY = 4;
+    public static final int FONT_NANUM_GOTHIC = 5;
+    public static final int FONT_NANUM_MYEONGJO = 6;
+    public static final int FONT_BON_GOTHIC = 7;
     public static final String DATE_FORMAT = "MMM dd, yyyy | HH:mm";
     public static final String ASSET = "file:///android_asset/";
     public static final int WRITE_EXTERNAL_STORAGE_REQUEST = 102;

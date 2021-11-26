@@ -77,11 +77,13 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         configSeekBar()
         selectFont(config.font, false)
         isNightMode = config.isNightMode
-        if (isNightMode) {
-            container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.night))
-        } else {
-            container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.white))
-        }
+        container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.layout_top_background))
+
+//        if (isNightMode) {
+//            container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.night))
+//        } else {
+//            container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.white))
+//        }
 
         if (isNightMode) {
             view_config_ib_day_mode.isSelected = false
@@ -212,7 +214,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
             override fun onAnimationEnd(animator: Animator) {
                 isNightMode = !isNightMode
-                config.isNightMode = isNightMode
+//                config.isNightMode = isNightMode
                 AppUtil.saveConfig(activity, config)
                 EventBus.getDefault().post(ReloadDataEvent())
             }

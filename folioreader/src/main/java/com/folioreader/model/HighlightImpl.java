@@ -3,7 +3,10 @@ package com.folioreader.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * This data structure holds information about an individual highlight.
@@ -40,6 +43,7 @@ public class HighlightImpl implements Parcelable, HighLight {
      * Date time when highlight is created (format:- MMM dd, yyyy | HH:mm).
      */
     private Date date;
+    private Long date_ts;
     /**
      * Field defines the color of the highlight. {@link HighlightStyle}
      */
@@ -107,13 +111,14 @@ public class HighlightImpl implements Parcelable, HighLight {
         }
     }
 
-    public HighlightImpl(int id, String bookId, String content, Date date, String type,
+    public HighlightImpl(int id, String bookId, String content, Date date, long date_ts, String type,
                          int pageNumber, String pageId,
                          String rangy, String note, String uuid) {
         this.id = id;
         this.bookId = bookId;
         this.content = content;
         this.date = date;
+        this.date_ts = date_ts;
         this.type = type;
         this.pageNumber = pageNumber;
         this.pageId = pageId;
@@ -156,6 +161,10 @@ public class HighlightImpl implements Parcelable, HighLight {
     public Date getDate() {
         return date;
     }
+
+    public long getTimeStamp() { return date_ts; }
+
+    public void setTimeStamp(long ts) { this.date_ts = ts; }
 
     public void setDate(Date date) {
         this.date = date;
@@ -220,7 +229,8 @@ public class HighlightImpl implements Parcelable, HighLight {
                 && (bookId != null ? bookId.equals(highlightImpl.bookId) : highlightImpl.bookId == null
                 && (content != null ? content.equals(highlightImpl.content) : highlightImpl.content == null
                 && (date != null ? date.equals(highlightImpl.date) : highlightImpl.date == null
-                && (type != null ? type.equals(highlightImpl.type) : highlightImpl.type == null))));
+                && (date_ts != null ? date_ts.equals(highlightImpl.date_ts) : highlightImpl.date_ts == null
+                && (Objects.equals(type, highlightImpl.type))))));
     }
 
     @Override
@@ -233,6 +243,7 @@ public class HighlightImpl implements Parcelable, HighLight {
         return result;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "HighlightImpl{" +
@@ -240,6 +251,7 @@ public class HighlightImpl implements Parcelable, HighLight {
                 ", bookId='" + bookId + '\'' +
                 ", content='" + content + '\'' +
                 ", date=" + date +
+                ", date_ts=" + date_ts +
                 ", type='" + type + '\'' +
                 ", pageNumber=" + pageNumber +
                 ", pageId='" + pageId + '\'' +
@@ -262,6 +274,7 @@ public class HighlightImpl implements Parcelable, HighLight {
         dest.writeString(rangy);
         dest.writeString(content);
         dest.writeSerializable(date);
+        dest.writeLong(date_ts);
         dest.writeString(type);
         dest.writeInt(pageNumber);
         dest.writeString(note);
@@ -275,6 +288,7 @@ public class HighlightImpl implements Parcelable, HighLight {
         rangy = in.readString();
         content = in.readString();
         date = (Date) in.readSerializable();
+        date_ts = in.readLong();
         type = in.readString();
         pageNumber = in.readInt();
         note = in.readString();

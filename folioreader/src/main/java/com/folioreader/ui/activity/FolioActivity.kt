@@ -18,11 +18,13 @@ package com.folioreader.ui.activity
 import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
+import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -32,32 +34,35 @@ import android.os.Handler
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.WindowManager
-import android.widget.Toast
+import android.view.*
+import android.view.inputmethod.EditorInfo
+import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.viewpager2.widget.ViewPager2
+import com.androidbolts.topsheet.TopSheetBehavior
+//import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Config
 import com.folioreader.Constants
 import com.folioreader.Constants.*
 import com.folioreader.FolioReader
 import com.folioreader.R
+import com.folioreader.model.BookmarkImpl
 import com.folioreader.model.DisplayUnit
 import com.folioreader.model.HighlightImpl
 import com.folioreader.model.event.MediaOverlayPlayPauseEvent
+import com.folioreader.model.event.ReloadDataEvent
 import com.folioreader.model.locators.ReadLocator
 import com.folioreader.model.locators.SearchLocator
+import com.folioreader.ui.adapter.AdapterFragmentStateChapterList
 import com.folioreader.ui.adapter.FolioPageFragmentAdapter
 import com.folioreader.ui.adapter.SearchAdapter
-import com.folioreader.ui.fragment.FolioPageFragment
-import com.folioreader.ui.fragment.MediaControllerFragment
+import com.folioreader.ui.fragment.*
 import com.folioreader.ui.view.ConfigBottomSheetDialogFragment
 import com.folioreader.ui.view.DirectionalViewpager
 import com.folioreader.ui.view.FolioAppBarLayout
@@ -65,7 +70,11 @@ import com.folioreader.ui.view.MediaControllerCallback
 import com.folioreader.util.AppUtil
 import com.folioreader.util.FileUtil
 import com.folioreader.util.UiUtil
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.android.synthetic.main.folio_activity.*
 import org.greenrobot.eventbus.EventBus
+import org.readium.r2.shared.Contributor
 import org.readium.r2.shared.Link
 import org.readium.r2.shared.Publication
 import org.readium.r2.streamer.parser.CbzParser
@@ -73,9 +82,9 @@ import org.readium.r2.streamer.parser.EpubParser
 import org.readium.r2.streamer.parser.PubBox
 import org.readium.r2.streamer.server.Server
 import java.lang.ref.WeakReference
+import kotlin.math.ceil
 
-class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback,
-    View.OnSystemUiVisibilityChangeListener {
+class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback{
 
     private var bookFileName: String? = null
 
@@ -83,8 +92,17 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private var actionBar: ActionBar? = null
     private var appBarLayout: FolioAppBarLayout? = null
     private var toolbar: Toolbar? = null
+    private var toolbar_title: TextView? = null
     private var distractionFreeMode: Boolean = false
     private var handler: Handler? = null
+
+    // Bottom //
+    private var fl_fragment_page: FrameLayout? = null
+    private var ll_bottom_bar: ConstraintLayout? = null
+    private var btnList: Button? = null
+    private var btnRecord: Button? = null
+    private var btnComment: Button? = null
+    private var btnReview: Button? = null
 
     private var currentChapterIndex: Int = 0
     private var mFolioPageFragmentAdapter: FolioPageFragmentAdapter? = null
@@ -106,18 +124,71 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private var portNumber: Int = Constants.DEFAULT_PORT_NUMBER
     private var streamerUri: Uri? = null
 
+    // Search //
+    private var mSearchMenu: ConstraintLayout? = null
+    private var mSearchButton: Button? = null
+    private var mSearchEdit: EditText? = null
+
     private var searchUri: Uri? = null
     private var searchAdapterDataBundle: Bundle? = null
     private var searchQuery: CharSequence? = null
     private var searchLocator: SearchLocator? = null
+
+    private var topBar: TopSheetBehavior<View>? = null
+    private var leftLayout: ConstraintLayout? = null
+    private var leftLayoutTitle: TextView? = null
+    private var leftLayoutAuthor: TextView? = null
+    private var leftLayoutDesc: TextView? = null
+    private var viewPager: ViewPager2? = null
+    private var btn_more: Button? = null
 
     private var displayMetrics: DisplayMetrics? = null
     private var density: Float = 0.toFloat()
     private var topActivity: Boolean? = null
     private var taskImportance: Int = 0
 
-    companion object {
+    private var llSetting: ConstraintLayout? = null
+    private var llSettingDetail: RelativeLayout? = null
+    private var btnLayerExpand: Button? = null
 
+    // Setting //
+    private var params: WindowManager.LayoutParams? = null
+    private lateinit var mConfig: Config
+    // FontSize //
+    private var btnFontSizeMinus: ImageButton? = null
+    private var tvFontSizeMinus: Button? = null
+    private var btnFontSizePlus: ImageButton? = null
+    private var tvFontSizePlus: Button? = null
+    private var tvFontSizeCenter: TextView? = null
+    // FontLineSpace //
+    private var btnFontLineSpaceMinus: ImageButton? = null
+    private var tvFontLineSpaceMinus: Button? = null
+    private var btnFontLineSpacePlus: ImageButton? = null
+    private var tvFontLineSpacePlus: Button? = null
+    private var tvFontLineSpaceCenter: TextView? = null
+    // FontWhiteSpace //
+    private var btnFontWhiteSpaceMinus: ImageButton? = null
+    private var tvFontWhiteSpaceMinus: Button? = null
+    private var btnFontWhiteSpacePlus: ImageButton? = null
+    private var tvFontWhiteSpacePlus: Button? = null
+    private var tvFontWhiteSpaceCenter: TextView? = null
+    // Alignment //
+    private var alignment_left: Button? = null
+    private var alignment_both: Button? = null
+    // Page //
+    private var page_tb: Button? = null
+    private var page_lr: Button? = null
+    private var page_scroll: Button? = null
+    // Theme //
+    private var btnThemeWhite: ImageView? = null
+    private var btnThemeGray: ImageView? = null
+    private var btnThemeGreen: ImageView? = null
+    private var btnThemeWood: ImageView? = null
+    private var btnThemeBlack: ImageView? = null
+    // Screen Filter //
+    private var iv_screen_fliter: ImageView? = null
+
+    companion object {
         @JvmField
         val LOG_TAG: String = FolioActivity::class.java.simpleName
 
@@ -128,12 +199,13 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         private const val BUNDLE_DISTRACTION_FREE_MODE = "BUNDLE_DISTRACTION_FREE_MODE"
         const val EXTRA_SEARCH_ITEM = "EXTRA_SEARCH_ITEM"
         const val ACTION_SEARCH_CLEAR = "ACTION_SEARCH_CLEAR"
+        private const val BOOKMARK_ITEM = "bookmark_item"
         private const val HIGHLIGHT_ITEM = "highlight_item"
     }
 
     private val closeBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.v(LOG_TAG, "-> closeBroadcastReceiver -> onReceive -> " + intent.action!!)
+            Log.e(LOG_TAG, "-> closeBroadcastReceiver -> onReceive -> " + intent.action!!)
 
             val action = intent.action
             if (action != null && action == FolioReader.ACTION_CLOSE_FOLIOREADER) {
@@ -165,7 +237,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
     private val searchReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.v(LOG_TAG, "-> searchReceiver -> onReceive -> " + intent.action!!)
+            Log.e(LOG_TAG, "-> searchReceiver -> onReceive -> " + intent.action!!)
 
             val action = intent.action ?: return
             when (action) {
@@ -176,8 +248,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
     private val currentFragment: FolioPageFragment?
         get() = if (mFolioPageFragmentAdapter != null && mFolioPageViewPager != null) {
-            mFolioPageFragmentAdapter!!
-                .getItem(mFolioPageViewPager!!.currentItem) as FolioPageFragment
+            mFolioPageFragmentAdapter!!.getItem(mFolioPageViewPager!!.currentItem) as FolioPageFragment
         } else {
             null
         }
@@ -196,7 +267,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        Log.v(LOG_TAG, "-> onNewIntent")
+        Log.e(LOG_TAG, "-> onNewIntent")
 
         val action = getIntent().action
         if (action != null && action == FolioReader.ACTION_CLOSE_FOLIOREADER) {
@@ -223,7 +294,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
     override fun onResume() {
         super.onResume()
-        Log.v(LOG_TAG, "-> onResume")
+        Log.e(LOG_TAG, "-> onResume")
         topActivity = true
 
         val action = intent.action
@@ -235,7 +306,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
     override fun onStop() {
         super.onStop()
-        Log.v(LOG_TAG, "-> onStop")
+        Log.e(LOG_TAG, "-> onStop")
         topActivity = false
     }
 
@@ -250,17 +321,12 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         displayMetrics = resources.displayMetrics
         display.getRealMetrics(displayMetrics)
         density = displayMetrics!!.density
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            closeBroadcastReceiver,
-            IntentFilter(FolioReader.ACTION_CLOSE_FOLIOREADER)
-        )
 
         // Fix for screen get turned off while reading
-        // TODO -> Make this configurable
         // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setConfig(savedInstanceState)
-        initDistractionFreeMode(savedInstanceState)
+        initDistractionFreeMode()
 
         setContentView(R.layout.folio_activity)
         this.savedInstanceState = savedInstanceState
@@ -271,43 +337,77 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
 
         mBookId = intent.getStringExtra(FolioReader.EXTRA_BOOK_ID)
-        mEpubSourceType = intent.extras!!.getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE) as EpubSourceType
+        mEpubSourceType = intent.extras!!.getSerializable(INTENT_EPUB_SOURCE_TYPE) as EpubSourceType
         if (mEpubSourceType == EpubSourceType.RAW) {
-            mEpubRawId = intent.extras!!.getInt(FolioActivity.INTENT_EPUB_SOURCE_PATH)
+            mEpubRawId = intent.extras!!.getInt(INTENT_EPUB_SOURCE_PATH)
         } else {
-            mEpubFilePath = intent.extras!!
-                .getString(FolioActivity.INTENT_EPUB_SOURCE_PATH)
+            mEpubFilePath = intent.extras!!.getString(INTENT_EPUB_SOURCE_PATH)
         }
 
         initActionBar()
         initMediaController()
+        initBottomBar()
+        initLeftLayout()
+        initSetting()
 
-        if (ContextCompat.checkSelfPermission(
-                this@FolioActivity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this@FolioActivity,
-                Constants.getWriteExternalStoragePerms(),
-                Constants.WRITE_EXTERNAL_STORAGE_REQUEST
-            )
+        if (ContextCompat.checkSelfPermission(this@FolioActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this@FolioActivity, getWriteExternalStoragePerms(), WRITE_EXTERNAL_STORAGE_REQUEST)
         } else {
             setupBook()
         }
     }
 
     private fun initActionBar() {
-
         appBarLayout = findViewById(R.id.appBarLayout)
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         actionBar = supportActionBar
+        actionBar!!.elevation = 0f
+        toolbar_title = findViewById(R.id.toolbar_title)
+
+        // Setting //
+        llSetting = findViewById(R.id.ll_setting_layer)
+        llSettingDetail = findViewById(R.id.ll_top_setting_detail)
+        btnLayerExpand = findViewById(R.id.btnLayerExpand)
+        btnLayerExpand!!.setOnClickListener {
+            llSettingDetail!!.visibility = if (llSettingDetail!!.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            btnLayerExpand!!.isSelected = llSettingDetail!!.visibility == View.VISIBLE
+
+            btnLayerExpand!!.setText(R.string.layout_setting_detail_open)
+        }
+
+        // Search //
+        mSearchMenu = findViewById(R.id.ll_menu_search)
+        mSearchEdit = findViewById(R.id.et_search)
+        mSearchEdit!!.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    search()
+                    return true
+                }
+                return false
+            }
+        })
+
+        mSearchButton = findViewById(R.id.bt_search)
+        mSearchButton!!.setOnClickListener {
+            Log.e(LOG_TAG, "on click search button ::: ${mSearchEdit!!.text}")
+            if (mSearchEdit!!.text.isEmpty()) {
+                Log.e(LOG_TAG, "검색어를 입력해야지~?")
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage("검색어를 입력해주세요.")
+                builder.setPositiveButton("확인") { _, _ -> }
+                builder.show()
+            } else {
+                Log.e(LOG_TAG, "검색 페이지로 이동")
+                search()
+            }
+        }
 
         val config = AppUtil.getSavedConfig(applicationContext)!!
 
-        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_drawer)
-        UiUtil.setColorIntToDrawable(config.themeColor, drawable!!)
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_nav_back)
+        UiUtil.setColorIntToDrawable(resources.getColor(R.color.layout_top_button_back), drawable!!)
         toolbar!!.navigationIcon = drawable
 
         if (config.isNightMode) {
@@ -316,100 +416,539 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             setDayMode()
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val color: Int
-            if (config.isNightMode) {
-                color = ContextCompat.getColor(this, R.color.black)
-            } else {
-                val attrs = intArrayOf(android.R.attr.navigationBarColor)
-                val typedArray = theme.obtainStyledAttributes(attrs)
-                color = typedArray.getColor(0, ContextCompat.getColor(this, R.color.white))
+//        val color: Int = if (config.isNightMode) {
+//            ContextCompat.getColor(this, R.color.black)
+//        } else {
+//            val attrs = intArrayOf(android.R.attr.navigationBarColor)
+//            val typedArray = theme.obtainStyledAttributes(attrs)
+//            typedArray.getColor(0, ContextCompat.getColor(this, R.color.white))
+//        }
+//        window.navigationBarColor = Color.BLACK
+    }
+
+    private fun initBottomBar() {
+        ll_bottom_bar = findViewById(R.id.ll_bottom_bar)
+        fl_fragment_page = findViewById(R.id.fl_fragment_page)
+
+        btnList = findViewById(R.id.btn_list)
+        btnList!!.setOnClickListener {
+            setMenuForFragment(false)
+            btnList!!.isSelected = true
+
+            val bundle = Bundle()
+            bundle.putSerializable(PUBLICATION, pubBox!!.publication)
+            bundle.putString(CHAPTER_SELECTED, spine!![currentChapterIndex].href)
+            bundle.putString(FolioReader.EXTRA_BOOK_ID, mBookId)
+            bundle.putString(BOOK_TITLE, bookFileName)
+
+            val adapter = AdapterFragmentStateChapterList(this, bundle)
+            viewPager!!.adapter = adapter
+
+            // TabLayout //
+            val tlIndex: TabLayout = findViewById(R.id.tl_index)
+            TabLayoutMediator(tlIndex, viewPager!!) { tab, position ->
+                if (position == 0) {
+                    tab.text = getString(R.string.layout_left_info_index)
+                } else {
+                    tab.text = getString(R.string.layout_left_info_list)
+                }
+            }.attach()
+
+            ll_left_layer.visibility = View.VISIBLE
+
+            leftLayoutTitle!!.text = pubBox!!.publication.metadata.title
+
+            for ((index, item) in pubBox!!.publication.metadata.authors.withIndex()) {
+                Log.e(LOG_TAG,"$index = ${item.name}")
+                leftLayoutAuthor!!.text = item.name
             }
-            window.navigationBarColor = color
+            leftLayoutDesc!!.text = if (pubBox!!.publication.metadata.description != "") pubBox!!.publication.metadata.description else ""
         }
 
-        if (Build.VERSION.SDK_INT < 16) {
-            // Fix for appBarLayout.fitSystemWindows() not being called on API < 16
-            appBarLayout!!.setTopMargin(statusBarHeight)
+        btnRecord = findViewById(R.id.btn_record)
+        btnRecord!!.setOnClickListener {
+            Log.e(LOG_TAG, "itemRecord")
+            setMenuForFragment(true)
+            btnRecord!!.isSelected = true
+
+            val fragment = RecordFragment()
+
+            val bundle = Bundle()
+            bundle.putSerializable(PUBLICATION, pubBox!!.publication)
+            bundle.putString(CHAPTER_SELECTED, spine!![currentChapterIndex].href)
+            bundle.putString(FolioReader.EXTRA_BOOK_ID, mBookId)
+            bundle.putString(BOOK_TITLE, bookFileName)
+            fragment.arguments = bundle
+
+            supportFragmentManager.beginTransaction().replace(R.id.fl_fragment_page, fragment).commit()
         }
+
+        btnComment = findViewById(R.id.btn_comment)
+        btnComment!!.setOnClickListener {
+            Log.e(LOG_TAG, "itemComment")
+            setMenuForFragment(true)
+            btnComment!!.isSelected = true
+
+            supportFragmentManager.beginTransaction().replace(R.id.fl_fragment_page, CommentFragment()).commit()
+        }
+
+        btnReview = findViewById(R.id.btn_review)
+        btnReview!!.setOnClickListener {
+            Log.e(LOG_TAG, "itemReview")
+            setMenuForFragment(true)
+            btnReview!!.isSelected = true
+
+            supportFragmentManager.beginTransaction().replace(R.id.fl_fragment_page, ReviewFragment()).commit()
+        }
+    }
+
+    private fun initLeftLayout() {
+        leftLayout = findViewById(R.id.ll_left_layer)
+        leftLayout!!.isClickable = true
+
+        leftLayoutTitle = findViewById(R.id.tv_sub_book_title)
+        leftLayoutAuthor = findViewById(R.id.tv_sub_book_author)
+        leftLayoutDesc = findViewById(R.id.tv_book_desc)
+        btn_more = findViewById(R.id.btn_more)
+        btn_more!!.setOnClickListener {
+            val dlg: AlertDialog.Builder = AlertDialog.Builder(this)
+            dlg.setMessage("준비중입니다.")
+            dlg.setPositiveButton("확인") { _, _ -> }
+            dlg.show()
+        }
+
+        viewPager = findViewById(R.id.viewPager)
+        viewPager!!.isUserInputEnabled = false
+    }
+
+    private fun initSetting() {
+        mConfig = AppUtil.getSavedConfig(this)!!
+
+        // FontStyle //
+        val fontSpinner: Spinner = findViewById(R.id.spinner_font)
+
+        val adapter: ArrayAdapter<String> = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,
+            resources.getStringArray(R.array.array_font_style)
+        )
+        fontSpinner.adapter = adapter
+        fontSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                Log.e(LOG_TAG, "position: $position, id : $id")
+
+                mConfig.font = position+5
+                AppUtil.saveConfig(this@FolioActivity, mConfig)
+                EventBus.getDefault().post(ReloadDataEvent())
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+        }
+
+        // FontSize //
+        btnFontSizeMinus = findViewById(R.id.btnFontSizeMinus)
+        btnFontSizeMinus!!.setOnClickListener {
+            setFontSize(-1)
+        }
+        tvFontSizeMinus = findViewById(R.id.tvFontSizeMinus)
+        tvFontSizeMinus!!.setOnClickListener {
+            setFontSize(-1)
+        }
+        btnFontSizePlus = findViewById(R.id.btnFontSizePlus)
+        btnFontSizePlus!!.setOnClickListener {
+            setFontSize(1)
+        }
+        tvFontSizePlus = findViewById(R.id.tvFontSizePlus)
+        tvFontSizePlus!!.setOnClickListener {
+            setFontSize(1)
+        }
+        tvFontSizeCenter = findViewById(R.id.tvFontSizeCenter)
+        setFontSize()
+        // FontLineSpace //
+        btnFontLineSpaceMinus = findViewById(R.id.btnFontLineSpaceMinus)
+        btnFontLineSpaceMinus!!.setOnClickListener {
+            setFontLineSpace(-1)
+        }
+        tvFontLineSpaceMinus = findViewById(R.id.tvFontLineSpaceMinus)
+        tvFontLineSpaceMinus!!.setOnClickListener {
+            setFontLineSpace(-1)
+        }
+        btnFontLineSpacePlus = findViewById(R.id.btnFontLineSpacePlus)
+        btnFontLineSpacePlus!!.setOnClickListener {
+            setFontLineSpace(1)
+        }
+        tvFontLineSpacePlus = findViewById(R.id.tvFontLineSpacePlus)
+        tvFontLineSpacePlus!!.setOnClickListener {
+            setFontLineSpace(1)
+        }
+        tvFontLineSpaceCenter = findViewById(R.id.tvFontLineSpaceCenter)
+        setFontLineSpace()
+        // FontWhiteSpace //
+        btnFontWhiteSpaceMinus = findViewById(R.id.btnFontWhiteSpaceMinus)
+        btnFontWhiteSpaceMinus!!.setOnClickListener {
+            setFontWhiteSpace(-1)
+        }
+        tvFontWhiteSpaceMinus = findViewById(R.id.tvFontWhiteSpaceMinus)
+        tvFontWhiteSpaceMinus!!.setOnClickListener {
+            setFontWhiteSpace(-1)
+        }
+        btnFontWhiteSpacePlus = findViewById(R.id.btnFontWhiteSpacePlus)
+        btnFontWhiteSpacePlus!!.setOnClickListener {
+            setFontWhiteSpace(1)
+        }
+        tvFontWhiteSpacePlus = findViewById(R.id.tvFontWhiteSpacePlus)
+        tvFontWhiteSpacePlus!!.setOnClickListener {
+            setFontWhiteSpace(1)
+        }
+        tvFontWhiteSpaceCenter = findViewById(R.id.tvFontWhiteSpaceCenter)
+        setFontWhiteSpace()
+        // Alignment //
+        alignment_left = findViewById(R.id.alignment_left)
+        alignment_left!!.setOnClickListener {
+            setAlignment("LEFT")
+        }
+        alignment_both = findViewById(R.id.alignment_both)
+        alignment_both!!.setOnClickListener {
+            setAlignment("BOTH")
+        }
+        setAlignment()
+        // Page //
+        page_tb = findViewById(R.id.page_tb)
+        page_tb!!.setOnClickListener {
+            setPage("TB")
+            onDirectionChange(Config.Direction.VERTICAL)
+        }
+        page_lr = findViewById(R.id.page_lr)
+        page_lr!!.setOnClickListener {
+            setPage("LR")
+            onDirectionChange(Config.Direction.HORIZONTAL)
+        }
+        page_scroll = findViewById(R.id.page_scroll)
+        page_scroll!!.setOnClickListener {
+            setPage("SCROLL")
+            onDirectionChange(Config.Direction.VERTICAL)
+        }
+        setPage()
+        // Theme //
+        btnThemeWhite = findViewById(R.id.btnThemeWhite)
+        btnThemeWhite!!.setOnClickListener {
+            setTheme("WHITE")
+        }
+        btnThemeGray = findViewById(R.id.btnThemeGray)
+        btnThemeGray!!.setOnClickListener {
+            setTheme("GRAY")
+        }
+        btnThemeGreen = findViewById(R.id.btnThemeGreen)
+        btnThemeGreen!!.setOnClickListener {
+            setTheme("GREEN")
+        }
+        btnThemeWood = findViewById(R.id.btnThemeWood)
+        btnThemeWood!!.setOnClickListener {
+            setTheme("WOOD")
+        }
+        btnThemeBlack = findViewById(R.id.btnThemeBlack)
+        btnThemeBlack!!.setOnClickListener {
+            setTheme("BLACK")
+        }
+        setTheme()
+        // Brightness //
+        params = window.attributes
+        val brightnessSeekbar: SeekBar = findViewById(R.id.brightness_seekbar)
+        brightnessSeekbar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                Log.e(LOG_TAG, "")
+                if (fromUser) {
+                    Log.e(LOG_TAG, "progress : $progress")
+
+                    var pt: Int = progress
+                    if (progress < 10) {
+                        pt = 10
+                    } else if (progress > 100) {
+                        pt = 100
+                    }
+                    params!!.screenBrightness = (pt/100).toFloat()
+                    window.attributes = params
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        iv_screen_fliter = findViewById(R.id.iv_screen_fliter)
+        val btnBlueFilter: ImageButton = findViewById(R.id.btnBlueFilter)
+        btnBlueFilter.setOnClickListener {
+            Log.e(LOG_TAG, "setOnClickListener : btnBlueFilter")
+            btnBlueFilter.isSelected = !btnBlueFilter.isSelected
+
+            iv_screen_fliter!!.visibility = if (btnBlueFilter.isSelected) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun setFontSize(type:Int = 0) {
+        var change: Boolean = false
+        if (type == -1) {
+            // 크기 감소
+            if (mConfig.fontSize > 1) {
+                mConfig.fontSize = mConfig.fontSize - 1
+                change = true
+            }
+        } else if (type == 1) {
+            // 크기 증가
+            if (mConfig.fontSize < 19) {
+                mConfig.fontSize = mConfig.fontSize + 1
+                change = true
+            }
+        }
+        Log.e(LOG_TAG, "type =>>> $type")
+
+        if (change) {
+            AppUtil.saveConfig(this, mConfig)
+            EventBus.getDefault().post(ReloadDataEvent())
+        }
+
+        tvFontSizeMinus!!.text = if (mConfig.fontSize <= 1) "" else (mConfig.fontSize-1).toString()
+        tvFontSizeCenter!!.text = (mConfig.fontSize).toString()
+        tvFontSizePlus!!.text = if (mConfig.fontSize > 18) "" else (mConfig.fontSize+1).toString()
+    }
+
+    private fun setFontLineSpace(type:Int = 0) {
+        var change: Boolean = false
+        if (type == -1) {
+            // 크기 감소
+            if (mConfig.fontLineSpace > 0) {
+                mConfig.fontLineSpace = mConfig.fontLineSpace - 10
+                change = true
+            }
+        } else if (type == 1) {
+            // 크기 증가
+            if (mConfig.fontLineSpace < 200) {
+                mConfig.fontLineSpace = mConfig.fontLineSpace + 10
+                change = true
+            }
+        }
+
+        if (change) {
+            AppUtil.saveConfig(this, mConfig)
+            EventBus.getDefault().post(ReloadDataEvent())
+        }
+
+        tvFontLineSpaceMinus!!.text = if (mConfig.fontLineSpace <= 0) "" else (mConfig.fontLineSpace-10).toString() + "%"
+        tvFontLineSpaceCenter!!.text = (mConfig.fontLineSpace).toString() + "%"
+        tvFontLineSpacePlus!!.text = if (mConfig.fontLineSpace > 190) "" else (mConfig.fontLineSpace+10).toString() + "%"
+    }
+
+    private fun setFontWhiteSpace(type:Int = 0) {
+        var change: Boolean = false
+        if (type == -1) {
+            // 크기 감소
+            if (mConfig.fontWhiteSpace > 0) {
+                mConfig.fontWhiteSpace = mConfig.fontWhiteSpace - 1
+                change = true
+            }
+        } else if (type == 1) {
+            // 크기 증가
+            if (mConfig.fontWhiteSpace < 6) {
+                mConfig.fontWhiteSpace = mConfig.fontWhiteSpace + 1
+                change = true
+            }
+        }
+
+        if (change) {
+            AppUtil.saveConfig(this, mConfig)
+            EventBus.getDefault().post(ReloadDataEvent())
+        }
+
+        tvFontWhiteSpaceMinus!!.text = if (mConfig.fontWhiteSpace <= 0) "" else (mConfig.fontWhiteSpace-1).toString()
+        tvFontWhiteSpaceCenter!!.text = (mConfig.fontWhiteSpace).toString()
+        tvFontWhiteSpacePlus!!.text = if (mConfig.fontWhiteSpace > 5) "" else (mConfig.fontWhiteSpace+1).toString()
+    }
+
+    private fun setAlignment(type:String = "") {
+        alignment_left!!.isSelected = false
+        alignment_both!!.isSelected = false
+
+        var t: String = type
+        if (t == "") {
+            t = mConfig.alignment
+            if (t == "") {
+                t = "LEFT"
+            }
+        }
+        Log.e(LOG_TAG, "t =>>> $t")
+
+        mConfig.alignment = t
+        AppUtil.saveConfig(this, mConfig)
+        EventBus.getDefault().post(ReloadDataEvent())
+
+        if (t == "LEFT") {
+            alignment_left!!.isSelected = true
+        } else if (t == "BOTH") {
+            alignment_both!!.isSelected = true
+        }
+    }
+
+    private fun setPage(type:String = "") {
+        page_tb!!.isSelected = false
+        page_lr!!.isSelected = false
+        page_scroll!!.isSelected = false
+
+        var t: String = type
+        if (t == "") {
+            t = mConfig.pageType
+            if (t == "") {
+                t = "TB"
+            }
+        }
+
+        mConfig.pageType = t
+        AppUtil.saveConfig(this, mConfig)
+        EventBus.getDefault().post(ReloadDataEvent())
+
+        if (t == "TB") {
+            page_tb!!.isSelected = true
+        } else if (t == "LR") {
+            page_lr!!.isSelected = true
+        } else if (t == "SCROLL") {
+            page_scroll!!.isSelected = true
+        }
+    }
+
+    private fun setTheme(type:String = "") {
+        btnThemeWhite!!.isSelected = false
+        btnThemeGray!!.isSelected = false
+        btnThemeGreen!!.isSelected = false
+        btnThemeWood!!.isSelected = false
+        btnThemeBlack!!.isSelected = false
+
+        var t: String = type
+        if (t == "") {
+            t = mConfig.currentTheme
+            if (t == "") {
+                t = "WHITE"
+            }
+        }
+
+        if (t == "WHITE" || t == "GRAY") {
+//            setTheme(R.style.FolioDayTheme)
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        } else {
+//            setTheme(R.style.FolioNightTheme)
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        }
+
+        mConfig.currentTheme = t
+        AppUtil.saveConfig(this, mConfig)
+        EventBus.getDefault().post(ReloadDataEvent())
+
+        when (t) {
+            "WHITE" -> btnThemeWhite!!.isSelected = true
+            "GRAY" -> btnThemeGray!!.isSelected = true
+            "GREEN" -> btnThemeGreen!!.isSelected = true
+            "WOOD" -> btnThemeWood!!.isSelected = true
+            "BLACK" -> btnThemeBlack!!.isSelected = true
+            else -> { // Note the block
+                print("x is neither 1 nor 2")
+            }
+        }
+    }
+
+    fun setMenuForFragment(flag: Boolean) {
+        btnList!!.isSelected = false
+        btnRecord!!.isSelected = false
+        btnComment!!.isSelected = false
+        btnReview!!.isSelected = false
+
+        if (fl_fragment_page != null) {
+            if (flag) {
+                fl_fragment_page!!.visibility = View.VISIBLE
+            } else {
+                fl_fragment_page!!.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun search() {
+        val intent = Intent(this, SearchActivity::class.java)
+        intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, spine?.size ?: 0)
+        intent.putExtra(SearchActivity.BUNDLE_SEARCH_URI, searchUri)
+        intent.putExtra(SearchAdapter.DATA_BUNDLE, searchAdapterDataBundle)
+        intent.putExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY, searchQuery)
+        intent.putExtra("TEXT_FOR_SEARCH", mSearchEdit!!.text.toString())
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        startActivityForResult(intent, RequestCode.SEARCH.value)
+        overridePendingTransition(0,0)
+        mSearchMenu!!.visibility = View.GONE
+        mSearchEdit!!.setText("")
     }
 
     override fun setDayMode() {
-        Log.v(LOG_TAG, "-> setDayMode")
+        Log.e(LOG_TAG, "-> setDayMode")
 
-        actionBar!!.setBackgroundDrawable(
-            ColorDrawable(ContextCompat.getColor(this, R.color.white))
-        )
-        toolbar!!.setTitleTextColor(ContextCompat.getColor(this, R.color.black))
+        actionBar!!.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(this, R.color.layout_top_background)))
+        toolbar!!.setTitleTextColor(ContextCompat.getColor(this, R.color.layout_top_text_title))
     }
 
     override fun setNightMode() {
-        Log.v(LOG_TAG, "-> setNightMode")
+        Log.e(LOG_TAG, "-> setNightMode")
 
-        actionBar!!.setBackgroundDrawable(
-            ColorDrawable(ContextCompat.getColor(this, R.color.black))
-        )
-        toolbar!!.setTitleTextColor(ContextCompat.getColor(this, R.color.night_title_text_color))
+        actionBar!!.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(this, R.color.layout_top_background)))
+        toolbar!!.setTitleTextColor(ContextCompat.getColor(this, R.color.layout_top_text_title))
     }
 
     private fun initMediaController() {
-        Log.v(LOG_TAG, "-> initMediaController")
+        Log.e(LOG_TAG, "-> initMediaController")
 
         mediaControllerFragment = MediaControllerFragment.getInstance(supportFragmentManager, this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
-
-        val config = AppUtil.getSavedConfig(applicationContext)!!
-        UiUtil.setColorIntToDrawable(config.themeColor, menu.findItem(R.id.itemSearch).icon)
-        UiUtil.setColorIntToDrawable(config.themeColor, menu.findItem(R.id.itemConfig).icon)
-        UiUtil.setColorIntToDrawable(config.themeColor, menu.findItem(R.id.itemTts).icon)
-
-        if (!config.isShowTts)
-            menu.findItem(R.id.itemTts).isVisible = false
-
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        //Log.d(LOG_TAG, "-> onOptionsItemSelected -> " + item.getItemId());
-
         val itemId = item.itemId
 
         if (itemId == android.R.id.home) {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
-            startContentHighlightActivity()
+            Log.e(LOG_TAG, "-> onOptionsItemSelected -> drawer")
+            finish()
+//            startContentHighlightActivity()
             return true
+        } else if (itemId == R.id.itemSetting) {
+            Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
 
+            if (llSetting!!.visibility == View.VISIBLE) {
+                llSetting!!.visibility = View.GONE
+                llSettingDetail!!.visibility = View.GONE
+                btnLayerExpand!!.isSelected = false
+            } else {
+                llSetting!!.visibility = View.VISIBLE
+                llSetting!!.isClickable = true
+            }
+
+//            showConfigBottomSheetDialogFragment()
+            return true
         } else if (itemId == R.id.itemSearch) {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-            if (searchUri == null)
-                return true
-            val intent = Intent(this, SearchActivity::class.java)
-            intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, spine?.size ?: 0)
-            intent.putExtra(SearchActivity.BUNDLE_SEARCH_URI, searchUri)
-            intent.putExtra(SearchAdapter.DATA_BUNDLE, searchAdapterDataBundle)
-            intent.putExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY, searchQuery)
-            startActivityForResult(intent, RequestCode.SEARCH.value)
+            Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
+            if (mSearchMenu!!.visibility == View.VISIBLE) {
+                mSearchMenu!!.visibility = View.GONE
+            } else {
+                mSearchMenu!!.visibility = View.VISIBLE
+                mSearchMenu!!.isClickable = true
+            }
             return true
-
-        } else if (itemId == R.id.itemConfig) {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
+        } else if (itemId == R.id.itemBookmark) {
+            Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
+            Log.e(LOG_TAG, "mFolioPageViewPager!!.currentItem :::::" + mFolioPageViewPager!!.currentItem.toString())
             showConfigBottomSheetDialogFragment()
-            return true
 
-        } else if (itemId == R.id.itemTts) {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-            showMediaController()
-            return true
         }
 
         return super.onOptionsItemSelected(item)
     }
 
     fun startContentHighlightActivity() {
-
         val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
 
         intent.putExtra(Constants.PUBLICATION, pubBox!!.publication)
@@ -427,7 +966,25 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         intent.putExtra(Constants.BOOK_TITLE, bookFileName)
 
         startActivityForResult(intent, RequestCode.CONTENT_HIGHLIGHT.value)
-        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up)
+        overridePendingTransition(0, 0)
+    }
+
+    fun setBookmarkPage(data : Intent) {
+        val bookmarkImpl = data.getParcelableExtra<BookmarkImpl>(BOOKMARK_ITEM)
+        Log.e(LOG_TAG, "bookmarkImpl : $bookmarkImpl")
+        currentChapterIndex = bookmarkImpl.pageNumber
+        mFolioPageViewPager!!.currentItem = currentChapterIndex
+        val folioPageFragment = currentFragment ?: return
+        folioPageFragment.scrollToHighlightId(bookmarkImpl.rangy)
+    }
+
+    fun setHighlightPage(data : Intent) {
+        val highlightImpl = data.getParcelableExtra<HighlightImpl>(HIGHLIGHT_ITEM)
+        Log.e(LOG_TAG, "highlightImpl : $highlightImpl")
+        currentChapterIndex = highlightImpl.pageNumber
+        mFolioPageViewPager!!.currentItem = currentChapterIndex
+        val folioPageFragment = currentFragment ?: return
+        folioPageFragment.scrollToHighlightId(highlightImpl.rangy)
     }
 
     fun showConfigBottomSheetDialogFragment() {
@@ -442,7 +999,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     private fun setupBook() {
-        Log.v(LOG_TAG, "-> setupBook")
+        Log.e(LOG_TAG, "-> setupBook")
         try {
             initBook()
             onBookInitSuccess()
@@ -450,18 +1007,15 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             Log.e(LOG_TAG, "-> Failed to initialize book", e)
             onBookInitFailure()
         }
-
     }
 
     @Throws(Exception::class)
     private fun initBook() {
-        Log.v(LOG_TAG, "-> initBook")
+        Log.e(LOG_TAG, "-> initBook")
 
         bookFileName = FileUtil.getEpubFilename(this, mEpubSourceType!!, mEpubFilePath, mEpubRawId)
-        val path = FileUtil.saveEpubFileAndLoadLazyBook(
-            this, mEpubSourceType, mEpubFilePath,
-            mEpubRawId, bookFileName
-        )
+
+        val path = FileUtil.saveEpubFileAndLoadLazyBook(this, mEpubSourceType, mEpubFilePath, mEpubRawId, bookFileName)
         val extension: Publication.EXTENSION
         var extensionString: String? = null
         try {
@@ -489,10 +1043,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         portNumber = AppUtil.getAvailablePortNumber(portNumber)
 
         r2StreamerServer = Server(portNumber)
-        r2StreamerServer!!.addEpub(
-            pubBox!!.publication, pubBox!!.container,
-            "/" + bookFileName!!, null
-        )
+        r2StreamerServer!!.addEpub(pubBox!!.publication, pubBox!!.container, "/" + bookFileName!!, null)
 
         r2StreamerServer!!.start()
 
@@ -504,10 +1055,10 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     private fun onBookInitSuccess() {
-
         val publication = pubBox!!.publication
         spine = publication.readingOrder
         title = publication.metadata.title
+        toolbar_title!!.text = title
 
         if (mBookId == null) {
             if (!publication.metadata.identifier.isEmpty()) {
@@ -536,7 +1087,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     override fun getStreamerUrl(): String {
-
         if (streamerUri == null) {
             streamerUri = Uri.parse(String.format(STREAMER_URL_TEMPLATE, LOCALHOST, portNumber, bookFileName))
         }
@@ -544,7 +1094,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     override fun onDirectionChange(newDirection: Config.Direction) {
-        Log.v(LOG_TAG, "-> onDirectionChange")
+        Log.e(LOG_TAG, "-> onDirectionChange")
 
         var folioPageFragment: FolioPageFragment? = currentFragment ?: return
         entryReadLocator = folioPageFragment!!.getLastReadLocator()
@@ -553,10 +1103,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         direction = newDirection
 
         mFolioPageViewPager!!.setDirection(newDirection)
-        mFolioPageFragmentAdapter = FolioPageFragmentAdapter(
-            supportFragmentManager,
-            spine, bookFileName, mBookId
-        )
+        mFolioPageFragmentAdapter = FolioPageFragmentAdapter(supportFragmentManager, spine, bookFileName, mBookId)
         mFolioPageViewPager!!.adapter = mFolioPageFragmentAdapter
         mFolioPageViewPager!!.currentItem = currentChapterIndex
 
@@ -566,32 +1113,23 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
     }
 
-    private fun initDistractionFreeMode(savedInstanceState: Bundle?) {
-        Log.v(LOG_TAG, "-> initDistractionFreeMode")
-
-        window.decorView.setOnSystemUiVisibilityChangeListener(this)
-
-        // Deliberately Hidden and shown to make activity contents lay out behind SystemUI
-        hideSystemUI()
-        showSystemUI()
-
-        distractionFreeMode = savedInstanceState != null && savedInstanceState.getBoolean(BUNDLE_DISTRACTION_FREE_MODE)
+    private fun initDistractionFreeMode() {
+        Log.e(LOG_TAG, "-> initDistractionFreeMode")
+        
+        distractionFreeMode = false
+        toggleSystemUI()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
-        Log.v(LOG_TAG, "-> onPostCreate")
+        Log.e(LOG_TAG, "-> onPostCreate")
 
         if (distractionFreeMode) {
             handler!!.post { hideSystemUI() }
         }
     }
-
-    /**
-     * @return returns height of status bar + app bar as requested by param [DisplayUnit]
-     */
+    
     override fun getTopDistraction(unit: DisplayUnit): Int {
-
         var topDistraction = 0
         if (!distractionFreeMode) {
             topDistraction = statusBarHeight
@@ -610,16 +1148,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             else -> throw IllegalArgumentException("-> Illegal argument -> unit = $unit")
         }
     }
-
-    /**
-     * Calculates the bottom distraction which can cause due to navigation bar.
-     * In mobile landscape mode, navigation bar is either to left or right of the screen.
-     * In tablet, navigation bar is always at bottom of the screen.
-     *
-     * @return returns height of navigation bar as requested by param [DisplayUnit]
-     */
+    
     override fun getBottomDistraction(unit: DisplayUnit): Int {
-
         var bottomDistraction = 0
         if (!distractionFreeMode)
             bottomDistraction = appBarLayout!!.navigationBarHeight
@@ -635,17 +1165,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             else -> throw IllegalArgumentException("-> Illegal argument -> unit = $unit")
         }
     }
-
-    /**
-     * Calculates the Rect for visible viewport of the webview in PX.
-     * Visible viewport changes in following cases -
-     * 1. In distraction free mode,
-     * 2. In mobile landscape mode as navigation bar is placed either on left or right side,
-     * 3. In tablets, navigation bar is always placed at bottom of the screen.
-     */
+    
     private fun computeViewportRect(): Rect {
-        //Log.v(LOG_TAG, "-> computeViewportRect");
-
         val viewportRect = Rect(appBarLayout!!.insets)
         if (distractionFreeMode)
             viewportRect.left = 0
@@ -661,7 +1182,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     override fun getViewportRect(unit: DisplayUnit): Rect {
-
         val viewportRect = computeViewportRect()
         when (unit) {
             DisplayUnit.PX -> return viewportRect
@@ -675,10 +1195,10 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             }
 
             DisplayUnit.CSS_PX -> {
-                viewportRect.left = Math.ceil((viewportRect.left / density).toDouble()).toInt()
-                viewportRect.top = Math.ceil((viewportRect.top / density).toDouble()).toInt()
-                viewportRect.right = Math.ceil((viewportRect.right / density).toDouble()).toInt()
-                viewportRect.bottom = Math.ceil((viewportRect.bottom / density).toDouble()).toInt()
+                viewportRect.left = ceil((viewportRect.left / density).toDouble()).toInt()
+                viewportRect.top = ceil((viewportRect.top / density).toDouble()).toInt()
+                viewportRect.right = ceil((viewportRect.right / density).toDouble()).toInt()
+                viewportRect.bottom = ceil((viewportRect.bottom / density).toDouble()).toInt()
                 return viewportRect
             }
 
@@ -690,67 +1210,49 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         return WeakReference(this)
     }
 
-    override fun onSystemUiVisibilityChange(visibility: Int) {
-        Log.v(LOG_TAG, "-> onSystemUiVisibilityChange -> visibility = $visibility")
-
-        distractionFreeMode = visibility != View.SYSTEM_UI_FLAG_VISIBLE
-        Log.v(LOG_TAG, "-> distractionFreeMode = $distractionFreeMode")
-
-        if (actionBar != null) {
-            if (distractionFreeMode) {
-                actionBar!!.hide()
-            } else {
-                actionBar!!.show()
-            }
-        }
-    }
-
     override fun toggleSystemUI() {
+        Log.e(LOG_TAG, "-> toggleSystemUI -> distractionFreeMode = $distractionFreeMode")
 
-        if (distractionFreeMode) {
-            showSystemUI()
+        if (mSearchMenu != null && mSearchMenu!!.visibility == View.VISIBLE) {
+            mSearchMenu!!.visibility = View.GONE
+        } else if (ll_left_layer != null && ll_left_layer!!.visibility == View.VISIBLE) {
+            setMenuForFragment(false)
+            ll_left_layer!!.visibility = View.GONE
+        } else if (llSetting != null && llSetting!!.visibility == View.VISIBLE) {
+            llSetting!!.visibility = View.GONE
+            llSettingDetail!!.visibility = View.GONE
         } else {
-            hideSystemUI()
+            if (distractionFreeMode) {
+                showSystemUI()
+            } else {
+                hideSystemUI()
+            }
+
+            distractionFreeMode = !distractionFreeMode
         }
     }
 
     private fun showSystemUI() {
-        Log.v(LOG_TAG, "-> showSystemUI")
+        Log.e(LOG_TAG, "-> showSystemUI")
 
-        if (Build.VERSION.SDK_INT >= 16) {
-            val decorView = window.decorView
-            decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-        } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            if (appBarLayout != null)
-                appBarLayout!!.setTopMargin(statusBarHeight)
-            onSystemUiVisibilityChange(View.SYSTEM_UI_FLAG_VISIBLE)
+        if (appBarLayout != null) {
+            appBarLayout!!.visibility = View.VISIBLE
+        }
+
+        if (ll_bottom_bar != null) {
+            ll_bottom_bar!!.visibility = View.VISIBLE
         }
     }
 
     private fun hideSystemUI() {
-        Log.v(LOG_TAG, "-> hideSystemUI")
+        Log.e(LOG_TAG, "-> hideSystemUI")
 
-        if (Build.VERSION.SDK_INT >= 16) {
-            val decorView = window.decorView
-            decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
-                    // Set the content to appear under the system bars so that the
-                    // content doesn't resize when the system bars hide and show.
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    // Hide the nav bar and status bar
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN)
-        } else {
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-            )
-            // Specified 1 just to mock anything other than View.SYSTEM_UI_FLAG_VISIBLE
-            onSystemUiVisibilityChange(1)
+        if (appBarLayout != null) {
+            appBarLayout!!.visibility = View.GONE
+        }
+
+        if (ll_bottom_bar != null) {
+            ll_bottom_bar!!.visibility = View.GONE
         }
     }
 
@@ -762,15 +1264,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
         return null
     }
-
-    /**
-     * Go to chapter specified by href
-     *
-     * @param href http link or relative link to the page or to the anchor
-     * @return true if href is of EPUB or false if other link
-     */
+    
     override fun goToChapter(href: String): Boolean {
-
         for (link in spine!!) {
             if (href.contains(link.href!!)) {
                 currentChapterIndex = spine!!.indexOf(link)
@@ -785,9 +1280,10 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == RequestCode.SEARCH.value) {
-            Log.v(LOG_TAG, "-> onActivityResult -> " + RequestCode.SEARCH)
+            Log.e(LOG_TAG, "-> onActivityResult -> " + RequestCode.SEARCH)
 
             if (resultCode == Activity.RESULT_CANCELED)
                 return
@@ -796,27 +1292,25 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             searchQuery = data.getCharSequenceExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY)
 
             if (resultCode == SearchActivity.ResultCode.ITEM_SELECTED.value) {
+                if (mSearchMenu != null && mSearchMenu!!.visibility == View.VISIBLE) {
+                    mSearchMenu!!.visibility = View.GONE
+                }
+                hideSystemUI()
 
                 searchLocator = data.getParcelableExtra(EXTRA_SEARCH_ITEM)
-                // In case if SearchActivity is recreated due to screen rotation then FolioActivity
-                // will also be recreated, so mFolioPageViewPager might be null.
+
                 if (mFolioPageViewPager == null) return
-                currentChapterIndex = getChapterIndex(Constants.HREF, searchLocator!!.href)
+                currentChapterIndex = getChapterIndex(HREF, searchLocator!!.href)
                 mFolioPageViewPager!!.currentItem = currentChapterIndex
                 val folioPageFragment = currentFragment ?: return
                 folioPageFragment.highlightSearchLocator(searchLocator!!)
                 searchLocator = null
             }
-
-        } else if (requestCode == RequestCode.CONTENT_HIGHLIGHT.value && resultCode == Activity.RESULT_OK &&
-            data!!.hasExtra(TYPE)
-        ) {
-
+        } else if (requestCode == RequestCode.CONTENT_HIGHLIGHT.value && resultCode == Activity.RESULT_OK && data!!.hasExtra(TYPE)) {
             val type = data.getStringExtra(TYPE)
 
             if (type == CHAPTER_SELECTED) {
                 goToChapter(data.getStringExtra(SELECTED_CHAPTER_POSITION))
-
             } else if (type == HIGHLIGHT_SELECTED) {
                 val highlightImpl = data.getParcelableExtra<HighlightImpl>(HIGHLIGHT_ITEM)
                 currentChapterIndex = highlightImpl.pageNumber
@@ -833,15 +1327,10 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         if (outState != null)
             outState!!.putSerializable(BUNDLE_READ_LOCATOR_CONFIG_CHANGE, lastReadLocator)
 
-        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        localBroadcastManager.unregisterReceiver(searchReceiver)
-        localBroadcastManager.unregisterReceiver(closeBroadcastReceiver)
-
         if (r2StreamerServer != null)
             r2StreamerServer!!.stop()
 
         if (isFinishing) {
-            localBroadcastManager.sendBroadcast(Intent(FolioReader.ACTION_FOLIOREADER_CLOSED))
             FolioReader.get().retrofit = null
             FolioReader.get().r2StreamerApi = null
         }
@@ -852,14 +1341,13 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     private fun configFolio() {
-
         mFolioPageViewPager = findViewById(R.id.folioPageViewPager)
         // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
         mFolioPageViewPager!!.setOnPageChangeListener(object : DirectionalViewpager.OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
             override fun onPageSelected(position: Int) {
-                Log.v(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = $position")
+                Log.e(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = $position")
 
                 EventBus.getDefault().post(
                     MediaOverlayPlayPauseEvent(
@@ -871,10 +1359,9 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             }
 
             override fun onPageScrollStateChanged(state: Int) {
-
                 if (state == DirectionalViewpager.SCROLL_STATE_IDLE) {
                     val position = mFolioPageViewPager!!.currentItem
-                    Log.v(
+                    Log.e(
                         LOG_TAG, "-> onPageScrollStateChanged -> DirectionalViewpager -> " +
                                 "position = " + position
                     )
@@ -906,18 +1393,16 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         // In case if SearchActivity is recreated due to screen rotation then FolioActivity
         // will also be recreated, so searchLocator is checked here.
         if (searchLocator != null) {
-
-            currentChapterIndex = getChapterIndex(Constants.HREF, searchLocator!!.href)
+            currentChapterIndex = getChapterIndex(HREF, searchLocator!!.href)
             mFolioPageViewPager!!.currentItem = currentChapterIndex
             val folioPageFragment = currentFragment ?: return
             folioPageFragment.highlightSearchLocator(searchLocator!!)
             searchLocator = null
 
         } else {
-
             val readLocator: ReadLocator?
             if (savedInstanceState == null) {
-                readLocator = intent.getParcelableExtra(FolioActivity.EXTRA_READ_LOCATOR)
+                readLocator = intent.getParcelableExtra(EXTRA_READ_LOCATOR)
                 entryReadLocator = readLocator
             } else {
                 readLocator = savedInstanceState!!.getParcelable(BUNDLE_READ_LOCATOR_CONFIG_CHANGE)
@@ -926,19 +1411,13 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             currentChapterIndex = getChapterIndex(readLocator)
             mFolioPageViewPager!!.currentItem = currentChapterIndex
         }
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            searchReceiver,
-            IntentFilter(ACTION_SEARCH_CLEAR)
-        )
     }
 
     private fun getChapterIndex(readLocator: ReadLocator?): Int {
-
         if (readLocator == null) {
             return 0
         } else if (!TextUtils.isEmpty(readLocator.href)) {
-            return getChapterIndex(Constants.HREF, readLocator.href)
+            return getChapterIndex(HREF, readLocator.href)
         }
 
         return 0
@@ -947,24 +1426,16 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private fun getChapterIndex(caseString: String, value: String): Int {
         for (i in spine!!.indices) {
             when (caseString) {
-                Constants.HREF -> if (spine!![i].href == value)
+                HREF -> if (spine!![i].href == value)
                     return i
             }
         }
         return 0
     }
 
-    /**
-     * If called, this method will occur after onStop() for applications targeting platforms
-     * starting with Build.VERSION_CODES.P. For applications targeting earlier platform versions
-     * this method will occur before onStop() and there are no guarantees about whether it will
-     * occur before or after onPause()
-     *
-     * @see Activity.onSaveInstanceState
-     */
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.v(LOG_TAG, "-> onSaveInstanceState")
+        Log.e(LOG_TAG, "-> onSaveInstanceState")
         this.outState = outState
 
         outState.putBoolean(BUNDLE_DISTRACTION_FREE_MODE, distractionFreeMode)
@@ -973,12 +1444,11 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     override fun storeLastReadLocator(lastReadLocator: ReadLocator) {
-        Log.v(LOG_TAG, "-> storeLastReadLocator")
+        Log.e(LOG_TAG, "-> storeLastReadLocator")
         this.lastReadLocator = lastReadLocator
     }
 
     private fun setConfig(savedInstanceState: Bundle?) {
-
         var config: Config?
         val intentConfig = intent.getParcelableExtra<Config>(Config.INTENT_CONFIG)
         val overrideConfig = intent.getBooleanExtra(Config.EXTRA_OVERRIDE_CONFIG, false)
@@ -1002,8 +1472,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             }
         }
 
-        // Code would never enter this if, just added for any unexpected error
-        // and to avoid lint warning
         if (config == null)
             config = Config()
 
@@ -1029,7 +1497,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            Constants.WRITE_EXTERNAL_STORAGE_REQUEST -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            WRITE_EXTERNAL_STORAGE_REQUEST -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setupBook()
             } else {
                 Toast.makeText(this, getString(R.string.cannot_access_epub_message), Toast.LENGTH_LONG).show()
@@ -1043,7 +1511,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     }
 
     private fun clearSearchLocator() {
-        Log.v(LOG_TAG, "-> clearSearchLocator")
+        Log.e(LOG_TAG, "-> clearSearchLocator")
 
         val fragments = mFolioPageFragmentAdapter!!.fragments
         for (i in fragments.indices) {
@@ -1059,5 +1527,11 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
                 bundle?.putParcelable(FolioPageFragment.BUNDLE_SEARCH_LOCATOR, null)
             }
         }
+    }
+
+    fun onMoveCheckedChapter(href: String) {
+        goToChapter(href)
+        setMenuForFragment(false)
+        ll_left_layer!!.visibility = View.GONE
     }
 }

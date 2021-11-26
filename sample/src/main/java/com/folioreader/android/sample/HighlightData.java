@@ -1,5 +1,7 @@
 package com.folioreader.android.sample;
 
+import androidx.annotation.NonNull;
+
 import com.folioreader.model.HighLight;
 
 import java.util.Date;
@@ -17,6 +19,7 @@ public class HighlightData implements HighLight {
     private String bookId;
     private String content;
     private Date date;
+    private long date_ts;
     private String type;
     private int pageNumber;
     private String pageId;
@@ -24,12 +27,14 @@ public class HighlightData implements HighLight {
     private String uuid;
     private String note;
 
+    @NonNull
     @Override
     public String toString() {
         return "HighlightData{" +
                 "bookId='" + bookId + '\'' +
                 ", content='" + content + '\'' +
                 ", date=" + date +
+                ", date_ts=" + date_ts +
                 ", type='" + type + '\'' +
                 ", pageNumber=" + pageNumber +
                 ", pageId='" + pageId + '\'' +
@@ -52,6 +57,11 @@ public class HighlightData implements HighLight {
     @Override
     public Date getDate() {
         return date;
+    }
+
+    @Override
+    public long getTimeStamp() {
+        return date_ts;
     }
 
     @Override

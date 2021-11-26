@@ -1,70 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/textViewCount"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="?searchItemHeaderBackgroundColor"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:paddingBottom="8dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+    <LinearLayout
+        android:id="@+id/ll_top_margin"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="56 results" />
+        android:orientation="horizontal" />
 
-    <TextView
-        android:id="@+id/textViewTitle"
+    <RelativeLayout
+        android:id="@+id/ll_middle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?searchItemHeaderBackgroundColor"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:paddingBottom="8dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_top_margin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewCount"
-        tools:text="Chapter 1" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <TextView
-        android:id="@+id/textViewResult"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:maxLines="6"
-        android:paddingBottom="8dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewTitle"
-        tools:text="...republishers to fill in for you as you focus on print and quick-and-dirty ebooks, but a content imperative vital to your survival in the digital future, as I’ll take the odd detour from the planned route to point out..." />
+        <TextView
+            android:id="@+id/textViewTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:includeFontPadding="false"
+            android:paddingBottom="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:textSize="14dp"
+            android:textColor="@color/layout_search_result_title_color"
+            android:text="TITLE"
+            tools:text="Chapter 1"/>
 
-    <View
-        android:id="@+id/viewLineBottom"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="?dividerColor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        <TextView
+            android:id="@+id/textViewResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:includeFontPadding="false"
+            android:ellipsize="end"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical"
+            android:textSize="13dp"
+            android:textColor="@color/layout_search_result_content_color"
+            android:layout_below="@id/textViewTitle"
+            tools:text="republishers to fill in for you as you focus on print and quick-and-dirty ebooks, but a content imperative vital to your survival in the digital future, as I’ll take the odd detour from the planned route to point out..." />
+
+        <TextView
+            android:id="@+id/textViewPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:includeFontPadding="false"
+            android:layout_below="@id/textViewResult"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/layout_search_result_page_color"
+            android:textSize="12dp"
+            android:text="10페이지" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_bottom_margin"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewResult" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_middle"
+        android:orientation="horizontal" >
+
+        <View
+            android:id="@+id/viewLineBottom1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/layout_search_result_bottom_line_color"
+            android:layout_gravity="bottom"
+            android:layout_marginHorizontal="16dp"/>
+
+        <View
+            android:id="@+id/viewLineBottom2"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:background="@color/layout_search_result_top_line_color"
+            android:visibility="gone"
+            android:layout_gravity="bottom"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

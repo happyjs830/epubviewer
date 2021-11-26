@@ -1,25 +1,49 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_centerInParent="true">
+    android:gravity="center" >
 
     <Button
-        android:id="@+id/btn_raw"
+        android:id="@+id/sample"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="10dp"
-        android:text="Open epub from raw" />
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/transparent"
+        android:text="그 식인인어는 죽어야 한다" />
 
     <Button
-        android:id="@+id/btn_assest"
+        android:id="@+id/sample2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_raw"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="10dp"
-        android:text="Open epub assests" />
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/sample"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/transparent"
+        android:text="노르드 월드에서 힐러로 살아가고 있습니다." />
+
+    <Button
+        android:id="@+id/sample3"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/sample2"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/transparent"
+        android:text="천재 마법사가 현대 지식으로 사업하는 법" />
+
+    <Button
+        android:id="@+id/the_silver_chair"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/sample3"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/transparent"
+        android:text="The Silver Chair" />
 
 </RelativeLayout>

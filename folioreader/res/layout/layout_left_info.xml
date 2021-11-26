@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="300dp"
+    android:layout_height="match_parent"
+    android:background="@color/layout_bottom_background"
+    android:layout_gravity="start">
+
+    <RelativeLayout
+        android:id="@+id/ll_bookinfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_sub_genre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="[판타지]"
+            android:textSize="14sp"
+            android:textColor="@color/layout_left_text_color_genre"/>
+
+        <TextView
+            android:id="@+id/tv_sub_book_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            android:layout_toEndOf="@id/tv_sub_genre"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="16dp"
+            android:text="SSS급 창술사, 회귀하다."
+            android:textSize="14sp"
+            android:textColor="@color/layout_left_text_color_title"/>
+
+        <ImageView
+            android:id="@+id/iv_book_main"
+            android:layout_width="70dp"
+            android:layout_height="108dp"
+            android:layout_below="@id/tv_sub_genre"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="17dp"/>
+
+        <ImageView
+            android:id="@+id/iv_star_writer"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:background="@drawable/star_writer"
+            android:layout_toEndOf="@+id/iv_book_main"
+            android:layout_below="@id/tv_sub_genre"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="17dp"/>
+
+        <TextView
+            android:id="@+id/tv_sub_book_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:layout_toEndOf="@id/iv_star_writer"
+            android:layout_below="@id/tv_sub_genre"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="17dp"
+            android:text="아낙수나문"
+            android:textSize="12sp"
+            android:textColor="@color/layout_left_text_color_author"/>
+
+        <TextView
+            android:id="@+id/tv_book_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:gravity="start|center_vertical"
+            android:layout_toEndOf="@+id/iv_book_main"
+            android:layout_below="@+id/iv_star_writer"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/layout_left_text_color_desc"
+            android:ellipsize="end"
+            android:text="돈 복을 타고 난 주인공. 안그래도 부자인데 각성으로 더 부자가 되다. '대한민국. 아니 세계 제일 부자가 될 때까지 벌어"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btn_more"
+            android:layout_width="wrap_content"
+            android:layout_height="16dp"
+            android:background="@android:color/transparent"
+            android:drawableEnd="@drawable/ic_arrow_front"
+            android:includeFontPadding="false"
+            android:text="@string/layout_left_info_more"
+            android:minWidth="0dp"
+            android:textSize="11dp"
+            android:textColor="@color/layout_left_text_color_more"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="18dp"
+            android:layout_below="@id/tv_book_desc"
+            android:layout_toEndOf="@id/iv_book_main"/>
+    </RelativeLayout>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tl_index"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/layout_bottom_background"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_bookinfo"
+        app:tabIndicatorColor="@color/layout_left_tabitem_selected_color"
+        app:tabRippleColor="@android:color/transparent"
+        app:tabSelectedTextColor="@color/layout_left_tabitem_selected_color"
+        app:tabTextAppearance="@style/TabTextSize"
+        app:tabTextColor="@color/layout_left_tabitem_normal_color"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabMaxWidth="0dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/layout_left_tablayout_border"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tl_index" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="1dp"
+        android:background="@color/layout_bottom_background"
+        app:layout_constraintTop_toBottomOf="@id/tl_index"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

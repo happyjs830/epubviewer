@@ -1,16 +1,16 @@
 <resources>
 
-    <string name="app_name">FolioReader</string>
+    <string name="app_name" translatable="false">EubViewer</string>
 
-    <string name="andada">Andada</string>
-    <string name="lato">Lato</string>
-    <string name="lora">Lora</string>
-    <string name="raleway">Raleway</string>
+    <string name="andada" translatable="false">Andada</string>
+    <string name="lato" translatable="false">Lato</string>
+    <string name="lora" translatable="false">Lora</string>
+    <string name="raleway" translatable="false">Raleway</string>
 
-    <string name="andada_font">fonts/andada/Andada-Regular.otf</string>
-    <string name="lato_font">fonts/lato/Lato-Regular.ttf</string>
-    <string name="lora_font">fonts/lora/Lora-Regular.ttf</string>
-    <string name="raleway_font">fonts/raleway/Raleway-Regular.ttf</string>
+    <string name="andada_font" translatable="false">fonts/andada/Andada-Regular.otf</string>
+    <string name="lato_font" translatable="false">fonts/lato/Lato-Regular.ttf</string>
+    <string name="lora_font" translatable="false">fonts/lora/Lora-Regular.ttf</string>
+    <string name="raleway_font" translatable="false">fonts/raleway/Raleway-Regular.ttf</string>
 
     <string name="minutes_left">%1$d minutes ·&#160;</string>
     <string name="minute_left">%1$d minute ·&#160;</string>
@@ -18,11 +18,6 @@
 
     <string name="copied">Copied</string>
     <string name="send_to">Send to</string>
-
-    <string name="copy">Copy</string>
-    <string name="share">Share</string>
-    <string name="define">Define</string>
-    <string name="highlight">Highlight</string>
 
     <string name="pages_left">%1$d pages left</string>
     <string name="page_left">%1$d page left</string>
@@ -97,13 +92,7 @@
     <string name="xhtml_mime_type" translatable="false">application/xhtml+xml</string>
     <string name="html_mime_type" translatable="false">text/html</string>
 
-    <string name="menu_item_search">Search</string>
-    <string name="menu_item_config">Configuration</string>
-    <string name="menu_item_tts">Text To Speech</string>
-
     <string name="search_hint">Search In Book</string>
-    <string name="search_empty_text">No results.</string>
-    <string name="search_failure_text">Something wen\'t wrong.</string>
 
     <plurals name="numberOfSearchResults">
         <item quantity="one">%d result</item>
@@ -115,5 +104,77 @@
     <string name="callScrollToCfi" translatable="false">javascript:scrollToCfi(\"%s\")</string>
     <string name="callHighlightSearchLocator" translatable="false">javascript:highlightSearchLocator(\"%s\")</string>
     <string name="callClearSelection" translatable="false">javascript:clearSelection()</string>
+
+
+    <string name="menu_item_setting">Setting</string>
+    <string name="menu_item_search">Search</string>
+    <string name="menu_item_bookmark">Bookmark</string>
+
+    <string name="menu_item_list">목록</string>
+    <string name="menu_item_record">독서기록</string>
+    <string name="menu_item_comment">댓글</string>
+    <string name="menu_item_review">리뷰</string>
+    <string name="menu_item_prev">이전</string>
+    <string name="menu_item_next">다음</string>
+
+    <string name="layout_search_button_name">검색</string>
+    <string name="layout_search_empty">검색 결과가 없습니다.</string>
+    <string name="layout_search_fail">검색중 오류가 발생하였습니다.\n잠시 후 다시 시도해 주시기 바랍니다.</string>
+
+    <string name="layout_record_tab_bookmark">책갈피</string>
+    <string name="layout_record_tab_highlight">하이라이트</string>
+    <string name="layout_record_tab_memo">메모</string>
+    <string name="layout_record_empty_bookmark">저장된 책갈피가 없어요.\n마음에 드는 문장을 기록해보세요.</string>
+    <string name="layout_record_empty_highlight">저장된 하이라이트가 없어요.\n마음에 드는 문장을 기록해보세요.</string>
+    <string name="layout_record_empty_memo">저장된 메모가 없어요.\n마음에 드는 문장을 기록해보세요.</string>
+    <string name="layout_record_edit">편집</string>
+    <string name="layout_record_edit_cancel">편집 취소</string>
+    <string name="layout_record_edit_select_all">전체선택</string>
+    <string name="layout_record_edit_cancel_all">전체취소</string>
+    <string name="layout_record_edit_delete">삭제</string>
+    <string name="layout_record_sort_page">페이지순</string>
+    <string name="layout_record_sort_register">등록일순</string>
+    <string name="layout_record_page_text">%d페이지</string>
+    <string name="layout_record_modal_bookmark_delete">책갈피 삭제</string>
+    <string name="layout_record_modal_highlight_delete">하이라이트 삭제</string>
+    <string name="layout_record_modal_memo_delete">메모 삭제</string>
+    <string name="layout_record_modal_highlight_share">공유</string>
+    <string name="layout_record_modal_highlight_memo">메모 등록/수정</string>
+    <string name="layout_record_modal_highlight_cancel">취소</string>
+    <string name="layout_record_dialog_remove_bookmark">총 %1d개의 책갈피를 삭제하시겠습니까?</string>
+    <string name="layout_record_dialog_remove_highlight">총 %1d개의 하이라이트를 삭제하시겠습니까?</string>
+    <string name="layout_record_dialog_remove_memo">총 %1d개의 메모를 삭제하시겠습니까?</string>
+
+    <string name="layout_left_info_more">더보기</string>
+    <string name="layout_left_info_index">목차</string>
+    <string name="layout_left_info_list">단행본 목록</string>
+
+    <string name="layout_text_selection_highlight_add">강조 추가</string>
+    <string name="layout_text_selection_highlight_remove">강조 삭제</string>
+    <string name="layout_text_selection_highlight_bookmark">책갈피</string>
+    <string name="layout_text_selection_highlight_memo">메모</string>
+    <string name="layout_text_selection_highlight_share">공유</string>
+    <string name="layout_text_selection_highlight_declare">오탈자 신고</string>
+
+    <string name="layout_setting_font_style">글꼴</string>
+    <string name="layout_setting_font_size">크기</string>
+    <string name="layout_setting_font_line_space">줄간격</string>
+    <string name="layout_setting_font_white_space">좌우여백</string>
+    <string name="layout_setting_alignment">문단정렬</string>
+    <string name="layout_setting_alignment_left">왼쪽정렬</string>
+    <string name="layout_setting_alignment_both">양쪽정렬</string>
+    <string name="layout_setting_page">페이지</string>
+    <string name="layout_setting_page_tb">상하</string>
+    <string name="layout_setting_page_lr">좌우</string>
+    <string name="layout_setting_page_scroll">스크롤</string>
+    <string name="layout_setting_effect">넘김효과</string>
+    <string name="layout_setting_theme">테마</string>
+    <string name="layout_setting_brightness">밝기</string>
+    <string name="layout_setting_night_mode">야간 모드 설정 시, 블루라이트가 차단됩니다.</string>
+    <string name="layout_setting_detail_open">탭하여 상세설정 열기</string>
+    <string name="layout_setting_detail_close">탭하여 상세설정 닫기</string>
+
+    <string name="common_dialog_btn_yes">확인</string>
+    <string name="common_dialog_btn_no">취소</string>
 
 </resources>

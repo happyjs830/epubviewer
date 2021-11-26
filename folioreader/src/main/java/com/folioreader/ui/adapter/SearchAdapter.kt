@@ -1,22 +1,26 @@
 package com.folioreader.ui.adapter
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.SpannableString
-import android.text.style.StyleSpan
-import android.text.style.UnderlineSpan
+import android.text.style.*
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.folioreader.R
 import com.folioreader.model.locators.SearchItemType
 import com.folioreader.model.locators.SearchLocator
 
-class SearchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class SearchAdapter(private val context: Context) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         @JvmField
@@ -24,34 +28,27 @@ class SearchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder> {
         const val DATA_BUNDLE = "DATA_BUNDLE"
     }
 
-    private val context: Context
     private var listViewType: ListViewType = ListViewType.INIT_VIEW
     private var searchLocatorList: MutableList<SearchLocator> = mutableListOf()
     var onItemClickListener: OnItemClickListener? = null
 
-    constructor(context: Context) : super() {
+    init {
         Log.v(LOG_TAG, "-> constructor")
-
-        this.context = context
-    }
-
-    constructor(context: Context, dataBundle: Bundle) : super() {
-        Log.v(LOG_TAG, "-> constructor")
-
-        this.context = context
-        listViewType = ListViewType.fromString(dataBundle.getString(ListViewType.KEY))
-        searchLocatorList = dataBundle.getParcelableArrayList("DATA") ?: mutableListOf()
     }
 
     fun changeDataBundle(dataBundle: Bundle) {
-
         listViewType = ListViewType.fromString(dataBundle.getString(ListViewType.KEY))
         searchLocatorList = dataBundle.getParcelableArrayList("DATA") ?: mutableListOf()
+
+        for (i in 1 until searchLocatorList.size) run {
+            val searchLocator: SearchLocator = searchLocatorList[i]
+            searchLocator.searchItemType
+        }
+
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-
         return when {
             searchLocatorList.size == 0 -> 1
             listViewType == ListViewType.PAGINATION_IN_PROGRESS_VIEW -> searchLocatorList.size + 1
@@ -60,65 +57,46 @@ class SearchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     override fun getItemViewType(position: Int): Int {
-
-        return if (listViewType == ListViewType.PAGINATION_IN_PROGRESS_VIEW &&
-            position == itemCount - 1
-        ) {
+        return if (listViewType == ListViewType.PAGINATION_IN_PROGRESS_VIEW && position == itemCount - 1) {
             ListViewType.PAGINATION_IN_PROGRESS_VIEW.value
-
         } else if (listViewType == ListViewType.PAGINATION_IN_PROGRESS_VIEW) {
             ListViewType.NORMAL_VIEW.value
-
         } else {
             listViewType.value
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-
         val viewHolder: ViewHolder
 
         when (viewType) {
-
             ListViewType.INIT_VIEW.value -> {
-
-                val itemView: View = LayoutInflater.from(context)
-                    .inflate(R.layout.item_search_init, parent, false)
+                val itemView: View = LayoutInflater.from(context).inflate(R.layout.item_search_init, parent, false)
                 viewHolder = InitViewHolder(itemView)
             }
 
             ListViewType.LOADING_VIEW.value -> {
-
-                val itemView: View = LayoutInflater.from(context)
-                    .inflate(R.layout.item_search_loading, parent, false)
+                val itemView: View = LayoutInflater.from(context).inflate(R.layout.item_search_loading, parent, false)
                 viewHolder = LoadingViewHolder(itemView)
             }
 
             ListViewType.NORMAL_VIEW.value -> {
-
-                val itemView: View = LayoutInflater.from(context)
-                    .inflate(R.layout.item_search_normal, parent, false)
+                val itemView: View = LayoutInflater.from(context).inflate(R.layout.item_search_normal, parent, false)
                 viewHolder = NormalViewHolder(itemView)
             }
 
             ListViewType.PAGINATION_IN_PROGRESS_VIEW.value -> {
-
-                val itemView: View = LayoutInflater.from(context)
-                    .inflate(R.layout.item_search_pagination_in_progress, parent, false)
+                val itemView: View = LayoutInflater.from(context).inflate(R.layout.item_search_pagination_in_progress, parent, false)
                 viewHolder = PaginationViewHolder(itemView)
             }
 
             ListViewType.EMPTY_VIEW.value -> {
-
-                val itemView: View = LayoutInflater.from(context)
-                    .inflate(R.layout.item_search_empty, parent, false)
+                val itemView: View = LayoutInflater.from(context).inflate(R.layout.item_search_empty, parent, false)
                 viewHolder = EmptyViewHolder(itemView)
             }
 
             ListViewType.FAILURE_VIEW.value -> {
-
-                val itemView: View = LayoutInflater.from(context)
-                    .inflate(R.layout.item_search_failure, parent, false)
+                val itemView: View = LayoutInflater.from(context).inflate(R.layout.item_search_failure, parent, false)
                 viewHolder = FailureViewHolder(itemView)
             }
 
@@ -129,15 +107,11 @@ class SearchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-
         val viewHolder = holder as ViewHolder
 
         when (getItemViewType(position)) {
-
             ListViewType.NORMAL_VIEW.value -> viewHolder.onBind(position)
-
-            else -> {
-            }
+            else -> {}
         }
     }
 
@@ -154,10 +128,18 @@ class SearchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     inner class NormalViewHolder(itemView: View) : ViewHolder(itemView), View.OnClickListener {
+        private val topMargin: LinearLayout = itemView.findViewById(R.id.ll_top_margin)
+        private val llMiddle: RelativeLayout = itemView.findViewById(R.id.ll_middle)
+        private val bottomMargin: LinearLayout = itemView.findViewById(R.id.ll_bottom_margin)
 
-        val textViewCount: TextView = itemView.findViewById(R.id.textViewCount)
-        val textViewTitle: TextView = itemView.findViewById(R.id.textViewTitle)
-        val textViewResult: TextView = itemView.findViewById(R.id.textViewResult)
+
+        private val textViewTitle: TextView = itemView.findViewById(R.id.textViewTitle)
+        private val textViewResult: TextView = itemView.findViewById(R.id.textViewResult)
+        private val textViewPage: TextView = itemView.findViewById(R.id.textViewPage)
+
+        private val viewLineBottom1: View = itemView.findViewById(R.id.viewLineBottom1)
+        private val viewLineBottom2: View = itemView.findViewById(R.id.viewLineBottom2)
+
         lateinit var searchLocator: SearchLocator
 
         init {
@@ -165,63 +147,77 @@ class SearchAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         override fun onBind(position: Int) {
-
             itemPosition = position
             searchLocator = searchLocatorList[position]
 
-            when (searchLocator.searchItemType) {
+            if (searchLocator.searchItemType == SearchItemType.RESOURCE_TITLE_ITEM) {
+                itemView.setOnClickListener(null)
 
-                SearchItemType.SEARCH_COUNT_ITEM -> {
-                    val count: Int = searchLocator.primaryContents.toInt()
-                    textViewCount.text = context.resources.getQuantityString(
-                        R.plurals.numberOfSearchResults, count, count
-                    )
-                    textViewCount.visibility = View.VISIBLE
-                    textViewTitle.visibility = View.GONE
-                    textViewResult.visibility = View.GONE
+                topMargin.visibility = View.VISIBLE
+                llMiddle.visibility = View.VISIBLE
+                bottomMargin.visibility = View.GONE
 
-                    itemView.setOnClickListener(null)
+                textViewTitle.text = searchLocator.primaryContents
+                textViewTitle.visibility = View.VISIBLE
+
+                textViewResult.visibility = View.GONE
+                textViewPage.visibility = View.GONE
+
+                viewLineBottom1.visibility = View.GONE
+                viewLineBottom2.visibility = View.GONE
+            } else if (searchLocator.searchItemType == SearchItemType.SEARCH_RESULT_ITEM) {
+                itemView.setOnClickListener(this)
+
+                topMargin.visibility = View.VISIBLE
+                llMiddle.visibility = View.VISIBLE
+                bottomMargin.visibility = View.VISIBLE
+
+                if (position >= 0) {
+                    if (searchLocatorList[position - 1].searchItemType == SearchItemType.RESOURCE_TITLE_ITEM) {
+                        topMargin.visibility = View.GONE
+                    }
                 }
 
-                SearchItemType.RESOURCE_TITLE_ITEM -> {
-                    textViewTitle.text = searchLocator.primaryContents
-                    textViewTitle.visibility = View.VISIBLE
-                    textViewCount.visibility = View.GONE
-                    textViewResult.visibility = View.GONE
+                textViewTitle.visibility = View.GONE
 
-                    itemView.setOnClickListener(null)
+                val before = searchLocator.text?.before!!.replace("...", "")
+                val spannableString = SpannableString(before + searchLocator.text?.hightlight + searchLocator.text?.after)
+                val from = before.length
+                val to = from + (searchLocator.text?.hightlight?.length ?: 0)
+                spannableString.setSpan(StyleSpan(Typeface.BOLD), from, to, 0)
+                spannableString.setSpan(ForegroundColorSpan(Color.BLACK), from, to, 0)
+                spannableString.setSpan(AbsoluteSizeSpan(14, true), from, to, 0)
+                textViewResult.text = spannableString
+                textViewResult.visibility = View.VISIBLE
+
+                textViewPage.visibility = View.VISIBLE
+
+                viewLineBottom1.visibility = View.GONE
+                viewLineBottom2.visibility = View.GONE
+
+                if (position < searchLocatorList.size -1) {
+                    if (searchLocatorList[position + 1].searchItemType == SearchItemType.RESOURCE_TITLE_ITEM) {
+                        viewLineBottom2.visibility = View.VISIBLE
+                    } else {
+                        viewLineBottom1.visibility = View.VISIBLE
+                    }
+                } else {
+                    viewLineBottom1.visibility = View.VISIBLE
                 }
+            } else {
+                itemView.setOnClickListener(null)
 
-                SearchItemType.SEARCH_RESULT_ITEM -> {
+                topMargin.visibility = View.GONE
+                llMiddle.visibility = View.GONE
+                bottomMargin.visibility = View.GONE
 
-                    val spannableString = SpannableString(
-                        searchLocator.text?.before
-                                + searchLocator.text?.hightlight
-                                + searchLocator.text?.after
-                    )
-                    val from = searchLocator.text?.before?.length ?: 0
-                    val to = from + (searchLocator.text?.hightlight?.length ?: 0)
-                    spannableString.setSpan(StyleSpan(Typeface.BOLD), from, to, 0)
-                    spannableString.setSpan(UnderlineSpan(), from, to, 0)
-                    textViewResult.text = spannableString
-
-                    textViewResult.visibility = View.VISIBLE
-                    textViewCount.visibility = View.GONE
-                    textViewTitle.visibility = View.GONE
-
-                    itemView.setOnClickListener(this)
-                }
-
-                else -> {
-                }
+                viewLineBottom1.visibility = View.GONE
+                viewLineBottom2.visibility = View.GONE
             }
         }
 
         override fun onClick(v: View?) {
-            onItemClickListener?.onItemClick(
-                this@SearchAdapter, this,
-                itemPosition, itemId
-            )
+            onItemClickListener?.onItemClick(this@SearchAdapter, this, itemPosition, itemId)
         }
     }
 

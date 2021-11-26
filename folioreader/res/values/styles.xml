@@ -7,6 +7,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
     </style>
 
     <!--
@@ -87,13 +88,17 @@
     </style>
 
     <style name="TextViewTextSelector" parent="@android:style/Widget.TextView">
-        <item name="android:padding">16dp</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?defaultFontColor</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:focusable">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:background">?selectableItemBackground</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textSize">13dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="ImageViewTextSelectorMarker">
@@ -128,6 +133,73 @@
 
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:statusBarColor" tools:targetApi="lollipop">@color/black</item>
+    </style>
+
+    <style name="TextViewSelectionDevideLine">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">#555555</item>
+    </style>
+
+    <!-- Main Bottom Menu -->
+    <style name="MainBottomMenuStyle">
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textSize">11dp</item>
+        <item name="android:textColor">@drawable/custom_bottom_button_color</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <!-- Main Bottom Direction -->
+    <style name="MainBottomDirectionStyle">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">22dp</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:textColor">@color/layout_bottom_button_direction_color</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="TabTextSize" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14dp</item>
+    </style>
+
+    <!-- Setting Layer Title -->
+    <style name="MenuSettingTitleTextViewStyle" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:textSize">13dp</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:textColor">@color/layout_setting_title_text_color</item>
+    </style>
+
+    <!-- Setting Layer Theme Box -->
+    <style name="MenuSettingThemeImageViewStyle">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_centerVertical">true</item>
+    </style>
+
+    <!-- Setting Layer Theme Text-->
+    <style name="MenuSettingThemeTextViewStyle">
+        <item name="android:layout_width">12dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:text">가</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppBottomSheetDialogTheme" parent="Theme.Design.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle</item>
+    </style>
+
+    <style name="AppModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/custom_layer_top_round</item>
     </style>
 
 </resources>
