@@ -23,8 +23,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -55,7 +53,6 @@ import com.folioreader.R
 import com.folioreader.model.BookmarkImpl
 import com.folioreader.model.DisplayUnit
 import com.folioreader.model.HighlightImpl
-import com.folioreader.model.event.MediaOverlayPlayPauseEvent
 import com.folioreader.model.event.ReloadDataEvent
 import com.folioreader.model.locators.ReadLocator
 import com.folioreader.model.locators.SearchLocator
@@ -74,7 +71,6 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.folio_activity.*
 import org.greenrobot.eventbus.EventBus
-import org.readium.r2.shared.Contributor
 import org.readium.r2.shared.Link
 import org.readium.r2.shared.Publication
 import org.readium.r2.streamer.parser.CbzParser
@@ -84,7 +80,7 @@ import org.readium.r2.streamer.server.Server
 import java.lang.ref.WeakReference
 import kotlin.math.ceil
 
-class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback{
+class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
     private var bookFileName: String? = null
 
@@ -119,7 +115,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private var mEpubFilePath: String? = null
     private var mEpubSourceType: EpubSourceType? = null
     private var mEpubRawId = 0
-    private var mediaControllerFragment: MediaControllerFragment? = null
     private var direction: Config.Direction = Config.Direction.VERTICAL
     private var portNumber: Int = Constants.DEFAULT_PORT_NUMBER
     private var streamerUri: Uri? = null
@@ -345,7 +340,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
 
         initActionBar()
-        initMediaController()
         initBottomBar()
         initLeftLayout()
         initSetting()
@@ -896,12 +890,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         toolbar!!.setTitleTextColor(ContextCompat.getColor(this, R.color.layout_top_text_title))
     }
 
-    private fun initMediaController() {
-        Log.e(LOG_TAG, "-> initMediaController")
-
-        mediaControllerFragment = MediaControllerFragment.getInstance(supportFragmentManager, this)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -918,6 +906,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         } else if (itemId == R.id.itemSetting) {
             Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
 
+            if (mSearchMenu!!.visibility == View.VISIBLE) mSearchMenu!!.visibility = View.GONE
+
             if (llSetting!!.visibility == View.VISIBLE) {
                 llSetting!!.visibility = View.GONE
                 llSettingDetail!!.visibility = View.GONE
@@ -931,6 +921,13 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             return true
         } else if (itemId == R.id.itemSearch) {
             Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
+
+            if (llSetting!!.visibility == View.VISIBLE) {
+                llSetting!!.visibility = View.GONE
+                llSettingDetail!!.visibility = View.GONE
+                btnLayerExpand!!.isSelected = false
+            }
+
             if (mSearchMenu!!.visibility == View.VISIBLE) {
                 mSearchMenu!!.visibility = View.GONE
             } else {
@@ -941,32 +938,10 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         } else if (itemId == R.id.itemBookmark) {
             Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
             Log.e(LOG_TAG, "mFolioPageViewPager!!.currentItem :::::" + mFolioPageViewPager!!.currentItem.toString())
-            showConfigBottomSheetDialogFragment()
-
+//            showConfigBottomSheetDialogFragment()
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    fun startContentHighlightActivity() {
-        val intent = Intent(this@FolioActivity, ContentHighlightActivity::class.java)
-
-        intent.putExtra(Constants.PUBLICATION, pubBox!!.publication)
-        try {
-            intent.putExtra(CHAPTER_SELECTED, spine!![currentChapterIndex].href)
-        } catch (e: NullPointerException) {
-            Log.w(LOG_TAG, "-> ", e)
-            intent.putExtra(CHAPTER_SELECTED, "")
-        } catch (e: IndexOutOfBoundsException) {
-            Log.w(LOG_TAG, "-> ", e)
-            intent.putExtra(CHAPTER_SELECTED, "")
-        }
-
-        intent.putExtra(FolioReader.EXTRA_BOOK_ID, mBookId)
-        intent.putExtra(Constants.BOOK_TITLE, bookFileName)
-
-        startActivityForResult(intent, RequestCode.CONTENT_HIGHLIGHT.value)
-        overridePendingTransition(0, 0)
     }
 
     fun setBookmarkPage(data : Intent) {
@@ -992,10 +967,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             supportFragmentManager,
             ConfigBottomSheetDialogFragment.LOG_TAG
         )
-    }
-
-    fun showMediaController() {
-        mediaControllerFragment!!.show(supportFragmentManager)
     }
 
     private fun setupBook() {
@@ -1221,6 +1192,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         } else if (llSetting != null && llSetting!!.visibility == View.VISIBLE) {
             llSetting!!.visibility = View.GONE
             llSettingDetail!!.visibility = View.GONE
+            btnLayerExpand!!.isSelected = false
         } else {
             if (distractionFreeMode) {
                 showSystemUI()
@@ -1348,13 +1320,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
             override fun onPageSelected(position: Int) {
                 Log.e(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = $position")
-
-                EventBus.getDefault().post(
-                    MediaOverlayPlayPauseEvent(
-                        spine!![currentChapterIndex].href, false, true
-                    )
-                )
-                mediaControllerFragment!!.setPlayButtonDrawable()
                 currentChapterIndex = position
             }
 
@@ -1477,22 +1442,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
         AppUtil.saveConfig(this, config)
         direction = config.direction
-    }
-
-    override fun play() {
-        EventBus.getDefault().post(
-            MediaOverlayPlayPauseEvent(
-                spine!![currentChapterIndex].href, true, false
-            )
-        )
-    }
-
-    override fun pause() {
-        EventBus.getDefault().post(
-            MediaOverlayPlayPauseEvent(
-                spine!![currentChapterIndex].href, false, false
-            )
-        )
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {

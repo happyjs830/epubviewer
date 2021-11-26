@@ -5,13 +5,5 @@
         android:drawable="@drawable/ic_page_vertical_press"/>
 
     <item
-        android:state_focused="true"
-        android:drawable="@drawable/ic_page_vertical_press"/>
-
-    <item
-        android:state_pressed="true"
-        android:drawable="@drawable/ic_page_vertical_press"/>
-
-    <item
         android:drawable="@drawable/ic_page_vertical_normal"/>
 </selector>

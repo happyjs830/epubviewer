@@ -5,13 +5,5 @@
         android:drawable="@drawable/ic_dot_bl"/>
 
     <item
-        android:state_focused="true"
-        android:drawable="@drawable/ic_dot_bl"/>
-
-    <item
-        android:state_pressed="true"
-        android:drawable="@drawable/ic_dot_bl"/>
-
-    <item
         android:drawable="@drawable/ic_dot_gr"/>
 </selector>

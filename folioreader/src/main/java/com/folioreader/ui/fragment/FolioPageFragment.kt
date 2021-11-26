@@ -25,8 +25,6 @@ import androidx.fragment.app.Fragment
 import com.folioreader.Config
 import com.folioreader.FolioReader
 import com.folioreader.R
-import com.folioreader.mediaoverlay.MediaController
-import com.folioreader.mediaoverlay.MediaControllerCallbacks
 import com.folioreader.model.HighLight
 import com.folioreader.model.HighlightImpl
 import com.folioreader.model.event.*
@@ -56,8 +54,7 @@ import java.util.regex.Pattern
 /**
  * Created by mahavir on 4/2/16.
  */
-class FolioPageFragment : Fragment(),
-    HtmlTaskCallback, MediaControllerCallbacks, FolioWebView.SeekBarListener {
+class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarListener {
 
     companion object {
 
@@ -114,7 +111,6 @@ class FolioPageFragment : Fragment(),
 
     private var highlightStyle: String? = null
 
-    private var mediaController: MediaController? = null
     private var mConfig: Config? = null
     private var mBookId: String? = null
     var searchLocatorVisible: SearchLocator? = null
@@ -152,16 +148,6 @@ class FolioPageFragment : Fragment(),
 
         searchLocatorVisible = savedInstanceState?.getParcelable(BUNDLE_SEARCH_LOCATOR)
 
-        if (spineItem != null) {
-            // SMIL Parsing not yet implemented in r2-streamer-kotlin
-            //if (spineItem.getProperties().contains("media-overlay")) {
-            //    mediaController = new MediaController(getActivity(), MediaController.MediaType.SMIL, this);
-            //    hasMediaOverlay = true;
-            //} else {
-            mediaController = MediaController(activity, MediaController.MediaType.TTS, this)
-            mediaController!!.setTextToSpeech(activity)
-            //}
-        }
         highlightStyle = HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.Normal)
         mRootView = inflater.inflate(R.layout.folio_page_fragment, container, false)
         mPagesLeftTextView = mRootView!!.findViewById<View>(R.id.pagesLeft) as TextView
@@ -176,57 +162,6 @@ class FolioPageFragment : Fragment(),
         updatePagesLeftTextBg()
 
         return mRootView
-    }
-
-    /**
-     * [EVENT BUS FUNCTION]
-     * Function triggered from [MediaControllerFragment.initListeners] when pause/play
-     * button is clicked
-     *
-     * @param event of type [MediaOverlayPlayPauseEvent] contains if paused/played
-     */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun pauseButtonClicked(event: MediaOverlayPlayPauseEvent) {
-        if (isAdded && spineItem!!.href == event.href) {
-            mediaController!!.stateChanged(event)
-        }
-    }
-
-    /**
-     * [EVENT BUS FUNCTION]
-     * Function triggered from [MediaControllerFragment.initListeners] when speed
-     * change buttons are clicked
-     *
-     * @param event of type [MediaOverlaySpeedEvent] contains selected speed
-     * type HALF,ONE,ONE_HALF and TWO.
-     */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun speedChanged(event: MediaOverlaySpeedEvent) {
-        if (mediaController != null)
-            mediaController!!.setSpeed(event.speed)
-    }
-
-    /**
-     * [EVENT BUS FUNCTION]
-     * Function triggered from [MediaControllerFragment.initListeners] when new
-     * style is selected on button click.
-     *
-     * @param event of type [MediaOverlaySpeedEvent] contains selected style
-     * of type DEFAULT,UNDERLINE and BACKGROUND.
-     */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun styleChanged(event: MediaOverlayHighlightStyleEvent) {
-        if (isAdded) {
-            when (event.style) {
-                MediaOverlayHighlightStyleEvent.Style.DEFAULT -> highlightStyle =
-                        HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.Normal)
-                MediaOverlayHighlightStyleEvent.Style.UNDERLINE -> highlightStyle =
-                        HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.DottetUnderline)
-                MediaOverlayHighlightStyleEvent.Style.BACKGROUND -> highlightStyle =
-                        HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.TextColor)
-            }
-            mWebview!!.loadUrl(String.format(getString(R.string.setmediaoverlaystyle), highlightStyle))
-        }
     }
 
     /**
@@ -562,7 +497,6 @@ class FolioPageFragment : Fragment(),
                 // to handle TTS playback when highlight is deleted.
                 val p = Pattern.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")
                 if (!p.matcher(message).matches() && message != "undefined" && isCurrentFragment) {
-                    mediaController!!.speakAudio(message)
                 }
             }
 
@@ -575,7 +509,6 @@ class FolioPageFragment : Fragment(),
         super.onStop()
         Log.v(LOG_TAG, "-> onStop -> " + spineItem.href + " -> " + isCurrentFragment)
 
-        mediaController!!.stop()
         //TODO save last media overlay item
 
         if (isCurrentFragment)
@@ -794,12 +727,6 @@ class FolioPageFragment : Fragment(),
         }
     }
 
-    override fun resetCurrentIndex() {
-        if (isCurrentFragment) {
-            mWebview!!.loadUrl("javascript:rewindCurrentIndex()")
-        }
-    }
-
     @JavascriptInterface
     fun onReceiveBookmark(html: String?) {
         if (html != null) {
@@ -816,14 +743,6 @@ class FolioPageFragment : Fragment(),
             Log.e(LOG_TAG, "mCurrentPage : $mCurrentPage")
             rangy = HighlightUtil.createHighlightRangy(activity!!.applicationContext, html, mBookId, pageName, mCurrentPage!!, rangy)
         }
-    }
-
-    override fun highLightText(fragmentId: String) {
-        mWebview!!.loadUrl(String.format(getString(R.string.audio_mark_id), fragmentId))
-    }
-
-    override fun highLightTTS() {
-        mWebview!!.loadUrl("javascript:alert(getSentenceWithIndex('epub-media-overlay-playing'))")
     }
 
     @JavascriptInterface

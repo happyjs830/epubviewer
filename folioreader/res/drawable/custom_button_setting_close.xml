@@ -3,15 +3,6 @@
     <item
         android:state_selected="true"
         android:drawable="@drawable/ic_arrow_up"/>
-
-    <item
-        android:state_focused="true"
-        android:drawable="@drawable/ic_arrow_up"/>
-
-    <item
-        android:state_pressed="true"
-        android:drawable="@drawable/ic_arrow_up"/>
-
     <item
         android:drawable="@drawable/ic_arrow_down"/>
 </selector>
