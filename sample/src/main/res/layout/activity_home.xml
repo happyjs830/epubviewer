@@ -7,6 +7,7 @@
         android:id="@+id/sample"
         android:layout_width="match_parent"
         android:layout_height="30dp"
+        android:textSize="20dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
@@ -17,6 +18,7 @@
         android:id="@+id/sample2"
         android:layout_width="match_parent"
         android:layout_height="30dp"
+        android:textSize="20dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_below="@id/sample"
@@ -28,6 +30,7 @@
         android:id="@+id/sample3"
         android:layout_width="match_parent"
         android:layout_height="30dp"
+        android:textSize="20dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_below="@id/sample2"
@@ -36,12 +39,25 @@
         android:text="천재 마법사가 현대 지식으로 사업하는 법" />
 
     <Button
-        android:id="@+id/the_silver_chair"
+        android:id="@+id/sample4"
         android:layout_width="match_parent"
         android:layout_height="30dp"
+        android:textSize="20dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_below="@id/sample3"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/transparent"
+        android:text="도깨비들의 나라1" />
+
+    <Button
+        android:id="@+id/the_silver_chair"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:textSize="20dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/sample4"
         android:layout_marginTop="30dp"
         android:background="@android:color/transparent"
         android:text="The Silver Chair" />

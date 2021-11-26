@@ -57,6 +57,7 @@ public class HomeActivity extends AppCompatActivity
         findViewById(R.id.sample).setOnClickListener(this);
         findViewById(R.id.sample2).setOnClickListener(this);
         findViewById(R.id.sample3).setOnClickListener(this);
+        findViewById(R.id.sample4).setOnClickListener(this);
         findViewById(R.id.the_silver_chair).setOnClickListener(this);
     }
 
@@ -167,6 +168,9 @@ public class HomeActivity extends AppCompatActivity
                 break;
             case R.id.sample3:
                 folioReader.setConfig(config, true).openBook(R.raw.sample3);
+                break;
+            case R.id.sample4:
+                folioReader.setConfig(config, true).openBook(R.raw.sample4);
                 break;
             case R.id.the_silver_chair:
                 folioReader.setConfig(config, true).openBook(R.raw.the_silver_chair);
