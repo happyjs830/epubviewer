@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/layout_bottom_background"
+    android:layout_width="match_parent"
+    android:layout_height="26dp">
+
+    <SeekBar
+        android:id="@+id/page_seekbar"
+        android:layout_width="310dp"
+        android:layout_height="16dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="12dp"
+        android:min="0"
+        android:max="100"
+        android:splitTrack="false"
+        android:progress="100"
+        android:paddingStart="7dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
+        android:paddingEnd="7dp"
+        android:progressTint="@color/layout_setting_value_selected_text_color"
+        android:background="@null"
+        android:thumb="@drawable/custom_icon_seekbar_thumb"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/page_textView"/>
+
+    <TextView
+        android:id="@+id/page_textView"
+        android:layout_width="48dp"
+        android:layout_height="16dp"
+        android:text="1 / 1"
+        android:textSize="11dp"
+        android:textColor="@color/layout_bottom_button_direction_color"
+        android:gravity="center"
+        android:layout_marginEnd="16dp"
+        android:includeFontPadding="false"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
