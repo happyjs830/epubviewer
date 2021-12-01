@@ -27,12 +27,16 @@ import com.folioreader.ui.adapter.AdapterRecyclerViewItemHighlight;
 import com.folioreader.util.SharedPreferenceUtil;
 
 import org.greenrobot.eventbus.EventBus;
+import org.readium.r2.shared.Publication;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class FragmentRecordHighlight extends Fragment implements AdapterRecyclerViewItemHighlight.HighlightCallback, AdapterRecyclerViewItemHighlight.HighlightItemControllCallback {
     private final RecordFragment mParent;
+    private final Publication mPublication;
 
     private RelativeLayout rl_highlight_empty = null;
     private RelativeLayout rl_highlight_normal = null;
@@ -53,10 +57,11 @@ public class FragmentRecordHighlight extends Fragment implements AdapterRecycler
     private boolean isEditMode = false;
     private boolean isAllChecked = false;
 
-    public FragmentRecordHighlight(String bookId, String epubTitle, RecordFragment parent) {
+    public FragmentRecordHighlight(String bookId, String epubTitle, RecordFragment parent, Publication publication) {
         mBookId = bookId;
         mBookTitle = epubTitle;
         mParent = parent;
+        mPublication = publication;
     }
 
     @Override
@@ -101,7 +106,7 @@ public class FragmentRecordHighlight extends Fragment implements AdapterRecycler
         btn_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setEditMode();
+                setEditMode(!isEditMode);
             }
         });
 
@@ -141,7 +146,7 @@ public class FragmentRecordHighlight extends Fragment implements AdapterRecycler
             @Override
             public void onClickBack() {
                 Log.e(LOG_TAG, "initListener onClickBack");
-                setEditMode();
+                setEditMode(false);
             }
 
             @Override
@@ -175,11 +180,19 @@ public class FragmentRecordHighlight extends Fragment implements AdapterRecycler
                         @Override
                         public void onClick(DialogInterface dialog, int id)
                         {
+                            Collections.sort(mSelectedList, new Comparator<Integer>() {
+                                @Override
+                                public int compare(Integer o1, Integer o2) {
+                                    return Integer.compare(o1, o2);
+                                }
+                            });
+
                             for(int i=mSelectedList.size()-1; i>=0; i--) {
                                 ((AdapterRecyclerViewItemHighlight) Objects.requireNonNull(mRecyclerView.getAdapter())).removeList(mSelectedList.get(i));
                             }
                             setHighlightList(mHighlightList.size() > 0);
-                            setEditMode();
+                            mSelectedList.clear();
+                            setEditMode(false);
                         }
                     });
 
@@ -200,7 +213,7 @@ public class FragmentRecordHighlight extends Fragment implements AdapterRecycler
         mRecyclerView = mView.findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        AdapterRecyclerViewItemHighlight adapter = new AdapterRecyclerViewItemHighlight(getActivity(), mHighlightList, this, this);
+        AdapterRecyclerViewItemHighlight adapter = new AdapterRecyclerViewItemHighlight(getActivity(), mPublication, mHighlightList, this, this);
         adapter.setItemViewType(0);
         mRecyclerView.setAdapter(adapter);
         sortHighlightList(SharedPreferenceUtil.getSharedPreferencesString(getContext(), "SORT_HIGHLIGHT", ""));
@@ -285,8 +298,8 @@ public class FragmentRecordHighlight extends Fragment implements AdapterRecycler
         ((AdapterRecyclerViewItemHighlight) Objects.requireNonNull(mRecyclerView.getAdapter())).sortList(type);
     }
 
-    private void setEditMode() {
-        isEditMode = !isEditMode;
+    private void setEditMode(boolean flag) {
+        isEditMode = flag;
         btn_edit.setSelected(isEditMode);
 
         Log.e(LOG_TAG, "onClick : " + isEditMode);
@@ -307,9 +320,5 @@ public class FragmentRecordHighlight extends Fragment implements AdapterRecycler
         btn_sort_register.setVisibility((isEditMode) ? View.GONE : View.VISIBLE);
 
         ((AdapterRecyclerViewItemHighlight) Objects.requireNonNull(mRecyclerView.getAdapter())).setItemViewType(isEditMode ? 1 : 0);
-    }
-
-    public boolean getEditMode() {
-        return isEditMode;
     }
 }

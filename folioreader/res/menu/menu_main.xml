@@ -6,20 +6,20 @@
 
     <item
         android:id="@+id/itemSetting"
-        android:icon="@drawable/custom_icon_setting"
+        android:icon="@drawable/ic_nav_setting_gr"
         android:title="@string/menu_item_setting"
         app:showAsAction="ifRoom"
         tools:showAsAction="always" />
 
     <item
         android:id="@+id/itemSearch"
-        android:icon="@drawable/custom_icon_search"
+        android:icon="@drawable/ic_nav_search_gr"
         android:title="@string/menu_item_search"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/itemBookmark"
-        android:icon="@drawable/custom_icon_bookmark"
+        android:icon="@drawable/ic_nav_bookmark_gr"
         android:title="@string/menu_item_bookmark"
         app:showAsAction="ifRoom" />
 

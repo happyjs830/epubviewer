@@ -25,11 +25,17 @@ import com.folioreader.model.sqlite.BookmarkTable;
 import com.folioreader.ui.adapter.AdapterRecyclerViewItemBookmark;
 import com.folioreader.util.SharedPreferenceUtil;
 
+import org.readium.r2.shared.Publication;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerViewItemBookmark.BookmarkCallback, AdapterRecyclerViewItemBookmark.BookmarkItemControllCallback {
     private final RecordFragment mParent;
+    private final Publication mPublication;
 
     private RelativeLayout rl_bookmark_empty = null;
     private RelativeLayout rl_bookmark_normal = null;
@@ -42,7 +48,6 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
     private static final String BOOKMARK_ITEM = "bookmark_item";
     private final String LOG_TAG = "BookmarkFragment";
     private String mBookId = "";
-    private String mBookTitle = "";
 
     private RecyclerView mRecyclerView = null;
     private ArrayList<BookmarkImpl> mBookmarkList = null;
@@ -50,10 +55,10 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
     private boolean isEditMode = false;
     private boolean isAllChecked = false;
 
-    public FragmentRecordBookmark(String bookId, String epubTitle, RecordFragment parent) {
+    public FragmentRecordBookmark(String bookId, String epubTitle, RecordFragment parent, Publication publication) {
         mBookId = bookId;
-        mBookTitle = epubTitle;
         mParent = parent;
+        mPublication = publication;
     }
 
     @Override
@@ -78,8 +83,8 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
         Log.e(LOG_TAG, "~> onViewCreated");
 
         mSelectedList = new ArrayList<>();
-        mBookmarkList = BookmarkTable.getAllBookmarks(mBookId);
-        Log.e(LOG_TAG, "mHighlightList Size : " + mBookmarkList.size());
+        mBookmarkList = BookmarkTable.getBookmarksForID(mBookId);
+        Log.e(LOG_TAG, "mBookmarkList Size : " + mBookmarkList.size());
 
         // Layout //
         rl_bookmark_empty = mView.findViewById(R.id.rl_bookmark_empty);
@@ -98,7 +103,7 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
         btn_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setEditMode();
+                setEditMode(!isEditMode);
             }
         });
 
@@ -138,7 +143,7 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
             @Override
             public void onClickBack() {
                 Log.e(LOG_TAG, "initListener onClickBack");
-                setEditMode();
+                setEditMode(false);
             }
 
             @Override
@@ -172,11 +177,19 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
                         @Override
                         public void onClick(DialogInterface dialog, int id)
                         {
+                            Collections.sort(mSelectedList, new Comparator<Integer>() {
+                                @Override
+                                public int compare(Integer o1, Integer o2) {
+                                    return Integer.compare(o1, o2);
+                                }
+                            });
+
                             for(int i=mSelectedList.size()-1; i>=0; i--) {
                                 ((AdapterRecyclerViewItemBookmark) Objects.requireNonNull(mRecyclerView.getAdapter())).removeList(mSelectedList.get(i));
                             }
                             setBookmarkList(mBookmarkList.size() > 0);
-                            setEditMode();
+                            mSelectedList.clear();
+                            setEditMode(false);
                         }
                     });
 
@@ -197,7 +210,7 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
         mRecyclerView = mView.findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        AdapterRecyclerViewItemBookmark adapter = new AdapterRecyclerViewItemBookmark(getActivity(), mBookmarkList, this, this);
+        AdapterRecyclerViewItemBookmark adapter = new AdapterRecyclerViewItemBookmark(getActivity(), mPublication, mBookmarkList, this, this);
         adapter.setItemViewType(0);
         mRecyclerView.setAdapter(adapter);
         sortBookmarkList(SharedPreferenceUtil.getSharedPreferencesString(getContext(), "SORT_BOOKMARK", ""));
@@ -205,9 +218,6 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
 
     @Override
     public void onItemClick(BookmarkImpl bookmarkImpl) {
-        Log.e(LOG_TAG, "getContent : " + bookmarkImpl.getContent());
-        Log.e(LOG_TAG, "getPageId : " + bookmarkImpl.getPageId());
-
         Intent intent = new Intent();
         intent.putExtra("RECORD_TYPE", "BOOKMARK");
         intent.putExtra(BOOKMARK_ITEM, bookmarkImpl);
@@ -282,11 +292,11 @@ public class FragmentRecordBookmark extends Fragment implements AdapterRecyclerV
         ((AdapterRecyclerViewItemBookmark) Objects.requireNonNull(mRecyclerView.getAdapter())).sortList(type);
     }
 
-    private void setEditMode() {
-        isEditMode = !isEditMode;
+    private void setEditMode(boolean flag) {
+        isEditMode = flag;
         btn_edit.setSelected(isEditMode);
 
-        Log.e(LOG_TAG, "onClick : " + isEditMode);
+        Log.e(LOG_TAG, "setEditMode : " + isEditMode);
 
         if (isEditMode) {
             btn_edit.setText(Objects.requireNonNull(getContext()).getString(R.string.layout_record_edit_cancel));

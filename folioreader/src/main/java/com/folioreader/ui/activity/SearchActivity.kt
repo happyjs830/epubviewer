@@ -12,10 +12,12 @@ import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.SearchView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 //import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -23,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.folioreader.Config
 import com.folioreader.R
+import com.folioreader.ThemeConfig
 import com.folioreader.model.locators.SearchLocator
 import com.folioreader.ui.adapter.ListViewType
 import com.folioreader.ui.adapter.OnItemClickListener
@@ -50,8 +53,14 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     private var mBackButton: LinearLayoutCompat? = null
-    private var mSearchEdit: EditText? = null
+
+    // Search //
+    private var mSearchMenu: ConstraintLayout? = null
+    private var mSearchBG: LinearLayoutCompat? = null
+    private var mSearchEditBack: LinearLayoutCompat? = null
+    private var mSearchIcon: ImageView? = null
     private var mSearchButton: Button? = null
+    private var mSearchEdit: EditText? = null
 
     private var spineSize: Int = 0
     private lateinit var searchUri: Uri
@@ -67,13 +76,6 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
         super.onCreate(savedInstanceState)
 
         val config: Config = AppUtil.getSavedConfig(this)!!
-        if (config.isNightMode) {
-            Log.e(LOG_TAG, "night mode")
-            setTheme(R.style.FolioNightTheme)
-        } else {
-            Log.e(LOG_TAG, "day mode")
-            setTheme(R.style.FolioDayTheme)
-        }
 
         setContentView(R.layout.activity_search)
         procSearch(config)
@@ -127,6 +129,12 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
             navigateBack()
         }
 
+        // Search //
+        mSearchMenu = findViewById(R.id.ll_menu_search)
+        mSearchBG = findViewById(R.id.ll_search_background)
+        mSearchEditBack = findViewById(R.id.ll_search_bar)
+        mSearchIcon = findViewById(R.id.iv_search_icon)
+
         mSearchEdit = findViewById(R.id.et_search)
         mSearchEdit!!.setOnEditorActionListener(object : TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
@@ -178,6 +186,7 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
         })
 
         search()
+        updateTheme()
     }
 
     private fun click() {
@@ -194,6 +203,16 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
     private fun search() {
         val str: String = mSearchEdit!!.text.toString()
         searchView.setQuery(str, true)
+    }
+
+    private fun updateTheme() {
+        // Search Bar //
+        mSearchBG!!.setBackgroundResource(ThemeConfig._searchBarEditBox)
+        mSearchEditBack!!.setBackgroundResource(ThemeConfig._searchBarEditTextStyle)
+        mSearchIcon!!.setImageResource(ThemeConfig._searchBarSearchIcon)
+        mSearchEdit!!.setTextColor(ThemeConfig._searchBarEditTextColor)
+        mSearchButton!!.setBackgroundResource(ThemeConfig._searchBarButtonStyle)
+        mSearchButton!!.setTextColor(ThemeConfig._searchBarButtonTextColor)
     }
 
     override fun onNewIntent(intent: Intent) {

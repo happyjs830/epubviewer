@@ -36,4 +36,6 @@ public interface FolioActivityCallback {
     WeakReference<FolioActivity> getActivity();
 
     String getStreamerUrl();
+
+    void setPageInfo(int currentPage, int totalPage);
 }

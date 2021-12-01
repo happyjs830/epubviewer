@@ -19,26 +19,34 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.folioreader.R;
 import com.folioreader.model.BookmarkImpl;
 
+import org.readium.r2.shared.Publication;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class AdapterRecyclerViewItemBookmark extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final String LOG_TAG = "AdaptBookmarkFragment";
 
     private final Context mContext;
-    private final List<BookmarkImpl> mBookmarkList;
-    private BookmarkCallback mCallback;
+    private final Publication mPublication;
+    private final ArrayList<BookmarkImpl> mBookmarkList;
+    private final BookmarkCallback mCallback;
     private final BookmarkItemControllCallback mItemControllCallback;
 
     private int mListMode = 0;
     private boolean isAllChecked = false;
 
-    public AdapterRecyclerViewItemBookmark(Context context, ArrayList<BookmarkImpl> list, BookmarkCallback callback, BookmarkItemControllCallback itemCallback) {
+    public AdapterRecyclerViewItemBookmark(Context context, Publication publication, ArrayList<BookmarkImpl> list, BookmarkCallback callback, BookmarkItemControllCallback itemCallback) {
         this.mContext = context;
+        this.mPublication = publication;
         this.mBookmarkList = list;
         this.mCallback = callback;
         this.mItemControllCallback = itemCallback;
@@ -68,13 +76,12 @@ public class AdapterRecyclerViewItemBookmark extends RecyclerView.Adapter<Recycl
             final BookmarkEditHolder hd = ((BookmarkEditHolder) holder);
 
             hd.textViewContent.setText(Html.fromHtml(i.getContent()));
-
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             String date = sdf.format(i.getDate());
             hd.textViewDate.setText(date);
 
-            hd.textViewPage.setText(String.format(mContext.getString(R.string.layout_record_page_text), i.getPageNumber()));
-            hd.textViewChapter.setText(i.getPageId());
+            hd.textViewPage.setText(String.format(mContext.getString(R.string.layout_record_page_text), i.getChapterNo()));
+            hd.textViewChapter.setText(mPublication.getTableOfContents().get(i.getChapterNo()).getTitle());
             hd.btnCheck.setSelected(isAllChecked);
 
             hd.item_bookmark.setOnClickListener(new View.OnClickListener() {
@@ -105,8 +112,8 @@ public class AdapterRecyclerViewItemBookmark extends RecyclerView.Adapter<Recycl
             String date = sdf.format(i.getDate());
             hd.textViewDate.setText(date);
 
-            hd.textViewPage.setText(String.format(mContext.getString(R.string.layout_record_page_text), i.getPageNumber()));
-            hd.textViewChapter.setText(i.getPageId());
+            hd.textViewPage.setText(String.format(mContext.getString(R.string.layout_record_page_text), i.getChapterNo()));
+            hd.textViewChapter.setText(mPublication.getTableOfContents().get(i.getChapterNo()).getTitle());
 
             hd.item_bookmark.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -183,7 +190,7 @@ public class AdapterRecyclerViewItemBookmark extends RecyclerView.Adapter<Recycl
             public int compare(BookmarkImpl o1, BookmarkImpl o2) {
                 switch (type) {
                     case "PAGE":
-                        return Integer.compare(o1.getPageNumber(), o2.getPageNumber());
+                        return Integer.compare(o1.getChapterNo(), o2.getChapterNo());
                     case "REGISTER":
                         return Long.compare(o2.getTimeStamp(), o1.getTimeStamp());
                     default:

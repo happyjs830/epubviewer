@@ -33,7 +33,7 @@ public class DbAdapter {
         return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.COL_BOOK_ID + " = \"" + bookId + "\"", null);
     }
 
-    public static Cursor getBookMarksForBookId(String bookId) {
+    public static Cursor getBookmarksForBookId(String bookId) {
         return mDatabase.rawQuery("SELECT * FROM " + BookmarkTable.TABLE_NAME + " WHERE " + BookmarkTable.COL_BOOK_ID + " = \"" + bookId + "\"", null);
     }
 
@@ -76,12 +76,12 @@ public class DbAdapter {
         return mDatabase.rawQuery("SELECT MAX(" + key + ") FROM " + tableName, null);
     }
 
-    public static long saveHighLight(ContentValues highlightContentValues) {
-        return mDatabase.insert(HighLightTable.TABLE_NAME, null, highlightContentValues);
+    public static long saveBookMark(ContentValues values) {
+        return mDatabase.insert(BookmarkTable.TABLE_NAME, null, values);
     }
 
-    public static long saveBookMark(ContentValues bookmarkContentValues) {
-        return mDatabase.insert(BookmarkTable.TABLE_NAME, null, bookmarkContentValues);
+    public static long saveHighLight(ContentValues highlightContentValues) {
+        return mDatabase.insert(HighLightTable.TABLE_NAME, null, highlightContentValues);
     }
 
     public static boolean updateHighLight(ContentValues highlightContentValues, String id) {
@@ -89,10 +89,6 @@ public class DbAdapter {
     }
 
     public static Cursor getHighlightsForPageId(String query, String pageId) {
-        return mDatabase.rawQuery(query, null);
-    }
-
-    public static Cursor getBookmarksForPageId(String query, String pageId) {
         return mDatabase.rawQuery(query, null);
     }
 
@@ -109,9 +105,5 @@ public class DbAdapter {
 
     public static Cursor getHighlightsForId(int id) {
         return mDatabase.rawQuery("SELECT * FROM " + HighLightTable.TABLE_NAME + " WHERE " + HighLightTable.ID + " = \"" + id + "\"", null);
-    }
-
-    public static Cursor getBookmarksForId(int id) {
-        return mDatabase.rawQuery("SELECT * FROM " + BookmarkTable.TABLE_NAME + " WHERE " + BookmarkTable.ID + " = \"" + id + "\"", null);
     }
 }

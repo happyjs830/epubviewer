@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.folioreader.R;
 import com.folioreader.model.HighlightImpl;
 
+import org.readium.r2.shared.Publication;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +32,7 @@ public class AdapterRecyclerViewItemHighlight extends RecyclerView.Adapter<Recyc
     private final String LOG_TAG = "AdaptHighlightFragment";
 
     private final Context mContext;
+    private final Publication mPublication;
     private final List<HighlightImpl> mHighlightList;
     private HighlightCallback mCallback;
     private final HighlightItemControllCallback mItemControllCallback;
@@ -37,8 +40,9 @@ public class AdapterRecyclerViewItemHighlight extends RecyclerView.Adapter<Recyc
     private int mListMode = 0;
     private boolean isAllChecked = false;
 
-    public AdapterRecyclerViewItemHighlight(Context context, ArrayList<HighlightImpl> list, HighlightCallback callback, HighlightItemControllCallback itemCallback) {
+    public AdapterRecyclerViewItemHighlight(Context context, Publication publication, ArrayList<HighlightImpl> list, HighlightCallback callback, HighlightItemControllCallback itemCallback) {
         this.mContext = context;
+        this.mPublication = publication;
         this.mHighlightList = list;
         this.mCallback = callback;
         this.mItemControllCallback = itemCallback;
@@ -74,7 +78,7 @@ public class AdapterRecyclerViewItemHighlight extends RecyclerView.Adapter<Recyc
             hd.textViewDate.setText(date);
 
             hd.textViewPage.setText(String.format(mContext.getString(R.string.layout_record_page_text), i.getPageNumber()));
-            hd.textViewChapter.setText(i.getPageId());
+            hd.textViewChapter.setText(mPublication.getTableOfContents().get(i.getPageNumber()).getTitle());
             hd.btnCheck.setSelected(isAllChecked);
 
             hd.item_highlight.setOnClickListener(new View.OnClickListener() {
@@ -106,7 +110,7 @@ public class AdapterRecyclerViewItemHighlight extends RecyclerView.Adapter<Recyc
             hd.textViewDate.setText(date);
 
             hd.textViewPage.setText(String.format(mContext.getString(R.string.layout_record_page_text), i.getPageNumber()));
-            hd.textViewChapter.setText(i.getPageId());
+            hd.textViewChapter.setText(mPublication.getTableOfContents().get(i.getPageNumber()).getTitle());
 
             hd.item_highlight.setOnClickListener(new View.OnClickListener() {
                 @Override

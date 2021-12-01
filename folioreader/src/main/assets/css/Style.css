@@ -43,15 +43,6 @@ body {
     overflow: !important;
 }
 
-/* Custom padding for tablets */
-/*
-@media only screen and (min-device-width: 768px){
-    body {
-        padding: 60px 80px !important;
-    }
-}
-*/
-
 /* Table */
 table {
     border-collapse: collapse;
@@ -163,9 +154,9 @@ input, textarea, button, highlight, select, a {
 
 /* Highlight styles */
 html .highlight_yellow, html .highlight_green, html .highlight_blue, html .highlight_pink, span.epub-media-overlay-playing {
-    border-radius: 3px;
-    padding: 0 2px;
-    margin: 0 -2px;
+    border-radius: 4px;
+    padding: 0 0px;
+    margin: 0 0px;
 }
 
 /* default media overlay style */
@@ -179,13 +170,11 @@ html .highlight_yellow, html .highlight_green, html .highlight_blue, html .highl
 }
 
 
-
 /*
  *
  * Night mode
  *
  */
-
 html {
     background-color: #FFFFFF !important;
 }
@@ -195,51 +184,53 @@ body {
 }
 
 html.theme-white { background-color: #FFFFFF !important; }
-html.theme-white .highlight_yellow { background:#5AACFF33 !important; }
-html.theme-white p, html.theme-white h1, html.theme-white h2, html.theme-white h3, html.theme-white h4, html.theme-white h5, html.theme-white h6 { color: #697383 !important; }
-
 html.theme-gray { background-color: #EAEDF0 !important; }
-html.theme-gray .highlight_yellow { background:#5AACFF40 !important; }
-html.theme-gray p, html.theme-gray h1, html.theme-gray h2, html.theme-gray h3, html.theme-gray h4, html.theme-gray h5, html.theme-gray h6 { color: #404551 !important; }
-
 html.theme-green { background-color: #D4EFC1 !important; }
-html.theme-green .highlight_yellow { background:#0C9A004D !important; }
-html.theme-green p, html.theme-green h1, html.theme-green h2, html.theme-green h3, html.theme-green h4, html.theme-green h5, html.theme-green h6 { color: #404551 !important; }
-
 html.theme-wood { background-color: #192C17 !important; }
-html.theme-wood .highlight_yellow { background:#5AFFE640 !important; }
-html.theme-wood p, html.theme-wood h1, html.theme-wood h2, html.theme-wood h3, html.theme-wood h4, html.theme-wood h5, html.theme-wood h6 { color: #73907F !important; }
-
 html.theme-black { background-color: #22242A !important; }
+
+html.theme-white .highlight_yellow { background:#5AACFF33 !important; }
+html.theme-gray .highlight_yellow { background:#5AACFF40 !important; }
+html.theme-green .highlight_yellow { background:#0C9A004D !important; }
+html.theme-wood .highlight_yellow { background:#5AFFE640 !important; }
 html.theme-black .highlight_yellow { background:#52A8F252 !important; }
-html.theme-black p, html.theme-black h1, html.theme-black h2, html.theme-black h3, html.theme-black h4, html.theme-black h5, html.theme-black h6 { color: #97A7BC !important; }
+
+.theme-white p, .theme-white div {
+    color: #697383 !important;
+    background-color: transparent !important;
+}
+
+.theme-gray p, .theme-gray div {
+    color: #404551 !important;
+    background-color: transparent !important;
+}
+
+.theme-green p, .theme-green div {
+    color: #404551 !important;
+    background-color: transparent !important;
+}
+
+.theme-wood p, .theme-wood div {
+    color: #73907F !important;
+    background-color: transparent !important;
+}
+
+.theme-black p, .theme-black div {
+    color: #97A7BC !important;
+    background-color: transparent !important;
+}
+
+.theme-white h1, .theme-white h2, .theme-white h3, .theme-white h4, .theme-white h5, .theme-white h6 { color: #697383 !important; }
+.theme-gray h1, .theme-gray h2, .theme-gray h3, .theme-gray h4, .theme-gray h5, .theme-gray h6 { color: #404551 !important; }
+.theme-green h1, .theme-green h2, .theme-green h3, .theme-green h4, .theme-green h5, .theme-green h6 { color: #404551 !important; }
+.theme-wood h1, .theme-wood h2, .theme-wood h3, .theme-wood h4, .theme-wood h5, .theme-wood h6 { color: #73907F !important; }
+.theme-black h1, .theme-black h2, .theme-black h3, .theme-black h4, .theme-black h5, .theme-black h6 { color: #97A7BC !important; }
 
 /*
  *
  * Font classes
  *
  */
-
-@font-face {
-    font-family: 'andada';
-    src: url('file:///android_asset/fonts/andada/Andada-Regular.otf');
-}
-
-@font-face {
-    font-family: 'lato';
-    src: url('file:///android_asset/fonts/lato/Lato-Regular.ttf');
-}
-
-@font-face {
-    font-family: 'lora';
-    src: url('file:///android_asset/fonts/lora/Lora-Regular.ttf');
-}
-
-@font-face {
-    font-family: 'raleway';
-    src: url('file:///android_asset/fonts/raleway/Raleway-Regular.ttf');
-}
-
 @font-face {
     font-family: 'nanum_gothic';
     src: url('file:///android_asset/fonts/nanum_gothic.ttf');
@@ -255,23 +246,11 @@ html.theme-black p, html.theme-black h1, html.theme-black h2, html.theme-black h
     src: url('file:///android_asset/fonts/notoserif_regular.ttf');
 }
 
-.andada {
-     font-family: "andada", sans-serif;
- }
-.lato {
-     font-family: "lato", serif;
- }
-.lora {
-     font-family: "lora", serif;
- }
-.raleway {
-     font-family: "raleway", sans-serif;
- }
 .nanum_gothic {
-      font-family: "nanum_gothic", sans-serif;
-  }
+    font-family: "nanum_gothic", sans-serif;
+}
 .nanum_myeongjo {
-   font-family: "nanum_myeongjo", sans-serif;
+    font-family: "nanum_myeongjo", sans-serif;
 }
 .notoserif_regular {
     font-family: "notoserif_regular", sans-serif;
@@ -293,10 +272,6 @@ html.theme-black p, html.theme-black h1, html.theme-black h2, html.theme-black h
 .textSizeSevenPlus * { font-size: 22px ; }
 .textSizeEight * { font-size: 23px ; }
 .textSizeEightPlus * { font-size: 24px ; }
-.textSizeNine * { font-size: 25px ; }
-.textSizeNinePlus * { font-size: 26px ; }
-.textSizeTen * { font-size: 27px ; }
-.textSizeTenPlus * { font-size: 28px ; }
 
 .textLineHeightOne * { line-height: 0% !important; }
 .textLineHeightOnePlus * { line-height: 10% !important; }

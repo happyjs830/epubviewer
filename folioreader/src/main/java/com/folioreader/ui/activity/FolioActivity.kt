@@ -19,57 +19,61 @@ import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.AlertDialog
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.text.SpannableString
 import android.text.TextUtils
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
-import com.androidbolts.topsheet.TopSheetBehavior
-//import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Config
-import com.folioreader.Constants
 import com.folioreader.Constants.*
 import com.folioreader.FolioReader
 import com.folioreader.R
+import com.folioreader.ThemeConfig
 import com.folioreader.model.BookmarkImpl
 import com.folioreader.model.DisplayUnit
 import com.folioreader.model.HighlightImpl
 import com.folioreader.model.event.ReloadDataEvent
 import com.folioreader.model.locators.ReadLocator
 import com.folioreader.model.locators.SearchLocator
+import com.folioreader.model.sqlite.BookmarkTable
 import com.folioreader.ui.adapter.AdapterFragmentStateChapterList
+import com.folioreader.ui.adapter.AdapterLayerSpinner
 import com.folioreader.ui.adapter.FolioPageFragmentAdapter
 import com.folioreader.ui.adapter.SearchAdapter
 import com.folioreader.ui.fragment.*
-import com.folioreader.ui.view.ConfigBottomSheetDialogFragment
 import com.folioreader.ui.view.DirectionalViewpager
 import com.folioreader.ui.view.FolioAppBarLayout
-import com.folioreader.ui.view.MediaControllerCallback
 import com.folioreader.util.AppUtil
 import com.folioreader.util.FileUtil
-import com.folioreader.util.UiUtil
 import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.android.synthetic.main.activity_record.*
 import kotlinx.android.synthetic.main.folio_activity.*
+import kotlinx.android.synthetic.main.view_loading.*
 import org.greenrobot.eventbus.EventBus
 import org.readium.r2.shared.Link
 import org.readium.r2.shared.Publication
@@ -78,6 +82,8 @@ import org.readium.r2.streamer.parser.EpubParser
 import org.readium.r2.streamer.parser.PubBox
 import org.readium.r2.streamer.server.Server
 import java.lang.ref.WeakReference
+import java.util.*
+import javax.security.auth.login.LoginException
 import kotlin.math.ceil
 
 class FolioActivity : AppCompatActivity(), FolioActivityCallback {
@@ -95,15 +101,22 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
     // Bottom //
     private var fl_fragment_page: FrameLayout? = null
     private var ll_bottom_bar: ConstraintLayout? = null
+    private var ll_bottom_seekbar: ConstraintLayout? = null
     private var btnList: Button? = null
     private var btnRecord: Button? = null
     private var btnComment: Button? = null
     private var btnReview: Button? = null
+    private var pageSeekBar: SeekBar? = null
+    private var pageTextView: TextView? = null
+    private var btnPrevBook: Button? = null
+    private var btnNextBook: Button? = null
+    private var devideLine: View? = null
 
     private var currentChapterIndex: Int = 0
     private var mFolioPageFragmentAdapter: FolioPageFragmentAdapter? = null
     private var entryReadLocator: ReadLocator? = null
     private var lastReadLocator: ReadLocator? = null
+    private var bookmarkReadLocator: ReadLocator? = null
     private var outState: Bundle? = null
     private var savedInstanceState: Bundle? = null
 
@@ -116,11 +129,14 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
     private var mEpubSourceType: EpubSourceType? = null
     private var mEpubRawId = 0
     private var direction: Config.Direction = Config.Direction.VERTICAL
-    private var portNumber: Int = Constants.DEFAULT_PORT_NUMBER
+    private var portNumber: Int = DEFAULT_PORT_NUMBER
     private var streamerUri: Uri? = null
 
     // Search //
     private var mSearchMenu: ConstraintLayout? = null
+    private var mSearchBG: LinearLayoutCompat? = null
+    private var mSearchEditBack: LinearLayoutCompat? = null
+    private var mSearchIcon: ImageView? = null
     private var mSearchButton: Button? = null
     private var mSearchEdit: EditText? = null
 
@@ -129,12 +145,12 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
     private var searchQuery: CharSequence? = null
     private var searchLocator: SearchLocator? = null
 
-    private var topBar: TopSheetBehavior<View>? = null
     private var leftLayout: ConstraintLayout? = null
+    private var leftBackground: ConstraintLayout? = null
     private var leftLayoutTitle: TextView? = null
     private var leftLayoutAuthor: TextView? = null
     private var leftLayoutDesc: TextView? = null
-    private var viewPager: ViewPager2? = null
+    private var infoViewPager: ViewPager2? = null
     private var btn_more: Button? = null
 
     private var displayMetrics: DisplayMetrics? = null
@@ -143,45 +159,61 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
     private var taskImportance: Int = 0
 
     private var llSetting: ConstraintLayout? = null
+    private var llTopSetting: RelativeLayout? = null
     private var llSettingDetail: RelativeLayout? = null
+    private var llTopSettingBottom: RelativeLayout? = null
     private var btnLayerExpand: Button? = null
+    private var iconSettingClose: ImageView? = null
 
     // Setting //
     private var params: WindowManager.LayoutParams? = null
     private lateinit var mConfig: Config
+    // FontStyle //
+    private var txtSettingFontStyle: TextView? = null
+    private var fontSpinner: Spinner? = null
     // FontSize //
+    private var txtSettingFontSize: TextView? = null
     private var btnFontSizeMinus: ImageButton? = null
     private var tvFontSizeMinus: Button? = null
     private var btnFontSizePlus: ImageButton? = null
     private var tvFontSizePlus: Button? = null
     private var tvFontSizeCenter: TextView? = null
     // FontLineSpace //
+    private var txtSettingFontLineSpace: TextView? = null
     private var btnFontLineSpaceMinus: ImageButton? = null
     private var tvFontLineSpaceMinus: Button? = null
     private var btnFontLineSpacePlus: ImageButton? = null
     private var tvFontLineSpacePlus: Button? = null
     private var tvFontLineSpaceCenter: TextView? = null
     // FontWhiteSpace //
+    private var txtSettingFontWhiteSpace: TextView? = null
     private var btnFontWhiteSpaceMinus: ImageButton? = null
     private var tvFontWhiteSpaceMinus: Button? = null
     private var btnFontWhiteSpacePlus: ImageButton? = null
     private var tvFontWhiteSpacePlus: Button? = null
     private var tvFontWhiteSpaceCenter: TextView? = null
     // Alignment //
+    private var txtSettingAlignment: TextView? = null
     private var alignment_left: Button? = null
     private var alignment_both: Button? = null
     // Page //
+    private var txtSettingPage: TextView? = null
     private var page_tb: Button? = null
     private var page_lr: Button? = null
     private var page_scroll: Button? = null
     // Theme //
+    private var txtSettingTheme: TextView? = null
     private var btnThemeWhite: ImageView? = null
     private var btnThemeGray: ImageView? = null
     private var btnThemeGreen: ImageView? = null
     private var btnThemeWood: ImageView? = null
     private var btnThemeBlack: ImageView? = null
+    // Brightness //
+    private var txtBrightness: TextView? = null
+    private var brightnessSeekbar: SeekBar? = null
     // Screen Filter //
     private var iv_screen_fliter: ImageView? = null
+    private var btnBlueFilter: ImageButton? = null
 
     companion object {
         @JvmField
@@ -194,34 +226,11 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         private const val BUNDLE_DISTRACTION_FREE_MODE = "BUNDLE_DISTRACTION_FREE_MODE"
         const val EXTRA_SEARCH_ITEM = "EXTRA_SEARCH_ITEM"
         const val ACTION_SEARCH_CLEAR = "ACTION_SEARCH_CLEAR"
-        private const val BOOKMARK_ITEM = "bookmark_item"
         private const val HIGHLIGHT_ITEM = "highlight_item"
+        private const val BOOKMARK_ITEM = "bookmark_item"
     }
 
-    private val closeBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            Log.e(LOG_TAG, "-> closeBroadcastReceiver -> onReceive -> " + intent.action!!)
-
-            val action = intent.action
-            if (action != null && action == FolioReader.ACTION_CLOSE_FOLIOREADER) {
-
-                try {
-                    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                    val tasks = activityManager.runningAppProcesses
-                    taskImportance = tasks[0].importance
-                } catch (e: Exception) {
-                    Log.e(LOG_TAG, "-> ", e)
-                }
-
-                val closeIntent = Intent(applicationContext, FolioActivity::class.java)
-                closeIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                closeIntent.action = FolioReader.ACTION_CLOSE_FOLIOREADER
-                this@FolioActivity.startActivity(closeIntent)
-            }
-        }
-    }
-
-    val statusBarHeight: Int
+    private val statusBarHeight: Int
         get() {
             var result = 0
             val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -229,17 +238,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
                 result = resources.getDimensionPixelSize(resourceId)
             return result
         }
-
-    private val searchReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            Log.e(LOG_TAG, "-> searchReceiver -> onReceive -> " + intent.action!!)
-
-            val action = intent.action ?: return
-            when (action) {
-                ACTION_SEARCH_CLEAR -> clearSearchLocator()
-            }
-        }
-    }
 
     private val currentFragment: FolioPageFragment?
         get() = if (mFolioPageFragmentAdapter != null && mFolioPageViewPager != null) {
@@ -254,7 +252,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         SD_CARD
     }
 
-    private enum class RequestCode private constructor(internal val value: Int) {
+    private enum class RequestCode(val value: Int) {
         CONTENT_HIGHLIGHT(77),
         SEARCH(101)
     }
@@ -268,8 +266,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         if (action != null && action == FolioReader.ACTION_CLOSE_FOLIOREADER) {
 
             if (topActivity == null || topActivity == false) {
-                // FolioActivity was already left, so no need to broadcast ReadLocator again.
-                // Finish activity without going through onPause() and onStop()
                 finish()
 
                 // To determine if app in background or foreground
@@ -294,7 +290,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
         val action = intent.action
         if (action != null && action == FolioReader.ACTION_CLOSE_FOLIOREADER) {
-            // FolioActivity is topActivity, so need to broadcast ReadLocator.
             finish()
         }
     }
@@ -352,6 +347,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
     }
 
     private fun initActionBar() {
+        Log.e("<TAG>", "initActionBar")
+
         appBarLayout = findViewById(R.id.appBarLayout)
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -361,17 +358,28 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
         // Setting //
         llSetting = findViewById(R.id.ll_setting_layer)
+        llTopSetting = findViewById(R.id.ll_top_setting)
         llSettingDetail = findViewById(R.id.ll_top_setting_detail)
+        llTopSettingBottom = findViewById(R.id.ll_top_setting_bottom)
         btnLayerExpand = findViewById(R.id.btnLayerExpand)
         btnLayerExpand!!.setOnClickListener {
             llSettingDetail!!.visibility = if (llSettingDetail!!.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-            btnLayerExpand!!.isSelected = llSettingDetail!!.visibility == View.VISIBLE
-
-            btnLayerExpand!!.setText(R.string.layout_setting_detail_open)
+            if (llSettingDetail!!.visibility == View.VISIBLE) {
+                btnLayerExpand!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingBtnClosePressIcon, 0, 0, 0)
+                btnLayerExpand!!.setText(R.string.layout_setting_detail_close)
+            } else {
+                btnLayerExpand!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingBtnCloseNormalIcon, 0, 0, 0)
+                btnLayerExpand!!.setText(R.string.layout_setting_detail_open)
+                hideDetailSetting()
+            }
         }
+        iconSettingClose = findViewById(R.id.iconSettingClose)
 
         // Search //
         mSearchMenu = findViewById(R.id.ll_menu_search)
+        mSearchBG = findViewById(R.id.ll_search_background)
+        mSearchEditBack = findViewById(R.id.ll_search_bar)
+        mSearchIcon = findViewById(R.id.iv_search_icon)
         mSearchEdit = findViewById(R.id.et_search)
         mSearchEdit!!.setOnEditorActionListener(object : TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
@@ -400,34 +408,24 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
         val config = AppUtil.getSavedConfig(applicationContext)!!
 
-        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_nav_back)
-        UiUtil.setColorIntToDrawable(resources.getColor(R.color.layout_top_button_back), drawable!!)
-        toolbar!!.navigationIcon = drawable
-
         if (config.isNightMode) {
             setNightMode()
         } else {
             setDayMode()
         }
-
-//        val color: Int = if (config.isNightMode) {
-//            ContextCompat.getColor(this, R.color.black)
-//        } else {
-//            val attrs = intArrayOf(android.R.attr.navigationBarColor)
-//            val typedArray = theme.obtainStyledAttributes(attrs)
-//            typedArray.getColor(0, ContextCompat.getColor(this, R.color.white))
-//        }
-//        window.navigationBarColor = Color.BLACK
     }
 
+    private var tlIndex: TabLayout? = null
     private fun initBottomBar() {
+        Log.e("<TAG>", "initBottomBar")
+
         ll_bottom_bar = findViewById(R.id.ll_bottom_bar)
+        ll_bottom_seekbar = findViewById(R.id.ll_bottom_seekbar)
         fl_fragment_page = findViewById(R.id.fl_fragment_page)
 
         btnList = findViewById(R.id.btn_list)
         btnList!!.setOnClickListener {
             setMenuForFragment(false)
-            btnList!!.isSelected = true
 
             val bundle = Bundle()
             bundle.putSerializable(PUBLICATION, pubBox!!.publication)
@@ -436,19 +434,30 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             bundle.putString(BOOK_TITLE, bookFileName)
 
             val adapter = AdapterFragmentStateChapterList(this, bundle)
-            viewPager!!.adapter = adapter
+            infoViewPager!!.adapter = adapter
 
             // TabLayout //
-            val tlIndex: TabLayout = findViewById(R.id.tl_index)
-            TabLayoutMediator(tlIndex, viewPager!!) { tab, position ->
-                if (position == 0) {
-                    tab.text = getString(R.string.layout_left_info_index)
-                } else {
-                    tab.text = getString(R.string.layout_left_info_list)
+            tlIndex = findViewById(R.id.tl_index)
+            tlIndex!!.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    infoViewPager!!.currentItem = tab!!.position
                 }
-            }.attach()
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {}
+
+            })
 
             ll_left_layer.visibility = View.VISIBLE
+
+            ll_left_layer.setBackgroundColor(ThemeConfig._leftLayerBackgroundColor)
+            infoViewPager!!.setBackgroundColor(ThemeConfig._leftLayerBackgroundColor)
+            leftLayoutTitle!!.setTextColor(ThemeConfig._leftLayerTitleTextColor)
+            leftLayoutAuthor!!.setTextColor(ThemeConfig._leftLayerAuthorTextColor)
+            leftLayoutDesc!!.setTextColor(ThemeConfig._leftLayerDescTextColor)
+            btn_more!!.setCompoundDrawablesWithIntrinsicBounds(0, 0, ThemeConfig._leftLayerMoreIcon, 0)
+            btn_more!!.setTextColor(ThemeConfig._leftLayerMoreTextColor)
 
             leftLayoutTitle!!.text = pubBox!!.publication.metadata.title
 
@@ -457,13 +466,17 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
                 leftLayoutAuthor!!.text = item.name
             }
             leftLayoutDesc!!.text = if (pubBox!!.publication.metadata.description != "") pubBox!!.publication.metadata.description else ""
+
+            updateTheme()
         }
 
         btnRecord = findViewById(R.id.btn_record)
         btnRecord!!.setOnClickListener {
             Log.e(LOG_TAG, "itemRecord")
             setMenuForFragment(true)
-            btnRecord!!.isSelected = true
+
+            btnRecord!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuRecordPressIcon, 0, 0)
+            btnRecord!!.setTextColor(ThemeConfig._mainViewerColor)
 
             val fragment = RecordFragment()
 
@@ -475,31 +488,74 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             fragment.arguments = bundle
 
             supportFragmentManager.beginTransaction().replace(R.id.fl_fragment_page, fragment).commit()
+            hideSetting()
+            if (ll_bottom_seekbar != null) {
+                ll_bottom_seekbar!!.visibility = View.GONE
+            }
         }
 
         btnComment = findViewById(R.id.btn_comment)
         btnComment!!.setOnClickListener {
             Log.e(LOG_TAG, "itemComment")
             setMenuForFragment(true)
-            btnComment!!.isSelected = true
+
+            btnComment!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuCommentPressIcon, 0, 0)
+            btnComment!!.setTextColor(ThemeConfig._mainViewerColor)
 
             supportFragmentManager.beginTransaction().replace(R.id.fl_fragment_page, CommentFragment()).commit()
+            hideSetting()
+            if (ll_bottom_seekbar != null) {
+                ll_bottom_seekbar!!.visibility = View.GONE
+            }
         }
 
         btnReview = findViewById(R.id.btn_review)
         btnReview!!.setOnClickListener {
             Log.e(LOG_TAG, "itemReview")
             setMenuForFragment(true)
-            btnReview!!.isSelected = true
+
+            btnReview!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuReviewPressIcon, 0, 0)
+            btnReview!!.setTextColor(ThemeConfig._mainViewerColor)
 
             supportFragmentManager.beginTransaction().replace(R.id.fl_fragment_page, ReviewFragment()).commit()
+            hideSetting()
+            if (ll_bottom_seekbar != null) {
+                ll_bottom_seekbar!!.visibility = View.GONE
+            }
         }
+
+        // About page //
+        pageSeekBar = findViewById(R.id.page_seekbar)
+        pageSeekBar!!.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                Log.e(LOG_TAG, "onStopTrackingTouch : ${seekBar!!.progress}")
+
+                // seekbar를 놓으면 해당 페이지로 이동
+                if (currentFragment != null) {
+                    currentFragment!!.moveSeekbarPosition(seekBar.progress)
+                }
+            }
+        })
+
+        pageTextView = findViewById(R.id.page_textView)
+
+        // 이전, 다음 버튼
+        btnPrevBook = findViewById(R.id.btn_prev_book)
+        btnNextBook = findViewById(R.id.btn_next_book)
+        devideLine = findViewById(R.id.devideLine)
     }
 
     private fun initLeftLayout() {
+        Log.e("<TAG>", "initLeftLayout")
+
         leftLayout = findViewById(R.id.ll_left_layer)
         leftLayout!!.isClickable = true
 
+        leftBackground = findViewById(R.id.ll_left_background)
         leftLayoutTitle = findViewById(R.id.tv_sub_book_title)
         leftLayoutAuthor = findViewById(R.id.tv_sub_book_author)
         leftLayoutDesc = findViewById(R.id.tv_book_desc)
@@ -511,34 +567,41 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             dlg.show()
         }
 
-        viewPager = findViewById(R.id.viewPager)
-        viewPager!!.isUserInputEnabled = false
+        infoViewPager = findViewById(R.id.infoViewPager)
+        infoViewPager!!.isUserInputEnabled = false
     }
 
     private fun initSetting() {
+        Log.e("<TAG>", "initSetting")
+
         mConfig = AppUtil.getSavedConfig(this)!!
 
         // FontStyle //
-        val fontSpinner: Spinner = findViewById(R.id.spinner_font)
+        txtSettingFontStyle = findViewById(R.id.txtSettingFontStyle)
+        fontSpinner = findViewById(R.id.spinner_font)
 
-        val adapter: ArrayAdapter<String> = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,
-            resources.getStringArray(R.array.array_font_style)
-        )
-        fontSpinner.adapter = adapter
-        fontSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+        val adapter = AdapterLayerSpinner(this, resources.getStringArray(R.array.array_font_style), mConfig)
+        fontSpinner!!.adapter = adapter
+        fontSpinner!!.setSelection(0, false)
+        fontSpinner!!.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 Log.e(LOG_TAG, "position: $position, id : $id")
 
-                mConfig.font = position+5
+                mConfig.font = position
                 AppUtil.saveConfig(this@FolioActivity, mConfig)
-                EventBus.getDefault().post(ReloadDataEvent())
+
+                if (currentFragment != null) {
+                    currentFragment!!.setFont(mConfig.font)
+                }
+//                EventBus.getDefault().post(ReloadDataEvent())
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
-
         }
+        fontSpinner!!.setBackgroundResource(ThemeConfig._settingFontSpinnerStyle)
 
         // FontSize //
+        txtSettingFontSize = findViewById(R.id.txtSettingFontSize)
         btnFontSizeMinus = findViewById(R.id.btnFontSizeMinus)
         btnFontSizeMinus!!.setOnClickListener {
             setFontSize(-1)
@@ -558,6 +621,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         tvFontSizeCenter = findViewById(R.id.tvFontSizeCenter)
         setFontSize()
         // FontLineSpace //
+        txtSettingFontLineSpace = findViewById(R.id.txtSettingFontLineSpace)
         btnFontLineSpaceMinus = findViewById(R.id.btnFontLineSpaceMinus)
         btnFontLineSpaceMinus!!.setOnClickListener {
             setFontLineSpace(-1)
@@ -577,6 +641,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         tvFontLineSpaceCenter = findViewById(R.id.tvFontLineSpaceCenter)
         setFontLineSpace()
         // FontWhiteSpace //
+        txtSettingFontWhiteSpace = findViewById(R.id.txtSettingFontWhiteSpace)
         btnFontWhiteSpaceMinus = findViewById(R.id.btnFontWhiteSpaceMinus)
         btnFontWhiteSpaceMinus!!.setOnClickListener {
             setFontWhiteSpace(-1)
@@ -596,6 +661,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         tvFontWhiteSpaceCenter = findViewById(R.id.tvFontWhiteSpaceCenter)
         setFontWhiteSpace()
         // Alignment //
+        txtSettingAlignment = findViewById(R.id.txtSettingAlignment)
         alignment_left = findViewById(R.id.alignment_left)
         alignment_left!!.setOnClickListener {
             setAlignment("LEFT")
@@ -606,6 +672,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         }
         setAlignment()
         // Page //
+        txtSettingPage = findViewById(R.id.txtSettingPage)
         page_tb = findViewById(R.id.page_tb)
         page_tb!!.setOnClickListener {
             setPage("TB")
@@ -623,6 +690,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         }
         setPage()
         // Theme //
+        txtSettingTheme = findViewById(R.id.txtSettingTheme)
         btnThemeWhite = findViewById(R.id.btnThemeWhite)
         btnThemeWhite!!.setOnClickListener {
             setTheme("WHITE")
@@ -643,23 +711,24 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         btnThemeBlack!!.setOnClickListener {
             setTheme("BLACK")
         }
-        setTheme()
         // Brightness //
+        txtBrightness = findViewById(R.id.txtBrightness)
         params = window.attributes
-        val brightnessSeekbar: SeekBar = findViewById(R.id.brightness_seekbar)
-        brightnessSeekbar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+        brightnessSeekbar = findViewById(R.id.brightness_seekbar)
+        brightnessSeekbar!!.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 Log.e(LOG_TAG, "")
                 if (fromUser) {
                     Log.e(LOG_TAG, "progress : $progress")
 
                     var pt: Int = progress
-                    if (progress < 10) {
-                        pt = 10
+                    if (progress < 20) {
+                        pt = 20
                     } else if (progress > 100) {
                         pt = 100
                     }
-                    params!!.screenBrightness = (pt/100).toFloat()
+
+                    params!!.screenBrightness = pt.toFloat() / 100
                     window.attributes = params
                 }
             }
@@ -670,40 +739,46 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         })
 
         iv_screen_fliter = findViewById(R.id.iv_screen_fliter)
-        val btnBlueFilter: ImageButton = findViewById(R.id.btnBlueFilter)
-        btnBlueFilter.setOnClickListener {
+        btnBlueFilter = findViewById(R.id.btnBlueFilter)
+        btnBlueFilter!!.setOnClickListener {
             Log.e(LOG_TAG, "setOnClickListener : btnBlueFilter")
-            btnBlueFilter.isSelected = !btnBlueFilter.isSelected
-
-            iv_screen_fliter!!.visibility = if (btnBlueFilter.isSelected) View.VISIBLE else View.GONE
+            btnBlueFilter!!.isSelected = !btnBlueFilter!!.isSelected
+            if (btnBlueFilter!!.isSelected) {
+                mConfig.screenFilter = 1
+            } else {
+                mConfig.screenFilter = 0
+            }
+            AppUtil.saveConfig(this, mConfig)
+            iv_screen_fliter!!.visibility = if (btnBlueFilter!!.isSelected) View.VISIBLE else View.GONE
         }
+        setTheme()
     }
 
     private fun setFontSize(type:Int = 0) {
         var change: Boolean = false
         if (type == -1) {
             // 크기 감소
-            if (mConfig.fontSize > 1) {
+            if (mConfig.fontSize > 9) {
                 mConfig.fontSize = mConfig.fontSize - 1
                 change = true
             }
         } else if (type == 1) {
             // 크기 증가
-            if (mConfig.fontSize < 19) {
+            if (mConfig.fontSize < 24) {
                 mConfig.fontSize = mConfig.fontSize + 1
                 change = true
             }
         }
-        Log.e(LOG_TAG, "type =>>> $type")
 
         if (change) {
+            currentFragment!!.setFontSize(mConfig.fontSize)
             AppUtil.saveConfig(this, mConfig)
-            EventBus.getDefault().post(ReloadDataEvent())
+//            EventBus.getDefault().post(ReloadDataEvent())
         }
 
-        tvFontSizeMinus!!.text = if (mConfig.fontSize <= 1) "" else (mConfig.fontSize-1).toString()
-        tvFontSizeCenter!!.text = (mConfig.fontSize).toString()
-        tvFontSizePlus!!.text = if (mConfig.fontSize > 18) "" else (mConfig.fontSize+1).toString()
+        tvFontSizeMinus!!.text = if (mConfig.fontSize <= 9) "" else (mConfig.fontSize-1).toString() + "px"
+        tvFontSizeCenter!!.text = (mConfig.fontSize).toString() + "px"
+        tvFontSizePlus!!.text = if (mConfig.fontSize > 23) "" else (mConfig.fontSize+1).toString() + "px"
     }
 
     private fun setFontLineSpace(type:Int = 0) {
@@ -723,8 +798,9 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         }
 
         if (change) {
+            currentFragment!!.setFontLineSpace(mConfig.fontLineSpace)
             AppUtil.saveConfig(this, mConfig)
-            EventBus.getDefault().post(ReloadDataEvent())
+//            EventBus.getDefault().post(ReloadDataEvent())
         }
 
         tvFontLineSpaceMinus!!.text = if (mConfig.fontLineSpace <= 0) "" else (mConfig.fontLineSpace-10).toString() + "%"
@@ -749,8 +825,9 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         }
 
         if (change) {
+            currentFragment!!.setFontWhiteSpace(mConfig.fontWhiteSpace)
             AppUtil.saveConfig(this, mConfig)
-            EventBus.getDefault().post(ReloadDataEvent())
+//            EventBus.getDefault().post(ReloadDataEvent())
         }
 
         tvFontWhiteSpaceMinus!!.text = if (mConfig.fontWhiteSpace <= 0) "" else (mConfig.fontWhiteSpace-1).toString()
@@ -769,17 +846,27 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
                 t = "LEFT"
             }
         }
-        Log.e(LOG_TAG, "t =>>> $t")
 
         mConfig.alignment = t
         AppUtil.saveConfig(this, mConfig)
-        EventBus.getDefault().post(ReloadDataEvent())
 
-        if (t == "LEFT") {
-            alignment_left!!.isSelected = true
-        } else if (t == "BOTH") {
-            alignment_both!!.isSelected = true
+        if (currentFragment != null) {
+            currentFragment!!.setAlignment(mConfig.alignment)
         }
+
+        if (mConfig.alignment == "LEFT") {
+            alignment_left!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingAlignmentLeftPressIcon, 0, 0, 0)
+            alignment_both!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingAlignmentBothNormalIcon, 0, 0, 0)
+            alignment_left!!.setTextColor(ThemeConfig._mainViewerColor)
+            alignment_both!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+        } else {
+            alignment_left!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingAlignmentLeftNormalIcon, 0, 0, 0)
+            alignment_both!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingAlignmentBothPressIcon, 0, 0, 0)
+            alignment_left!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            alignment_both!!.setTextColor(ThemeConfig._mainViewerColor)
+        }
+
+//        EventBus.getDefault().post(ReloadDataEvent())
     }
 
     private fun setPage(type:String = "") {
@@ -797,15 +884,30 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
         mConfig.pageType = t
         AppUtil.saveConfig(this, mConfig)
-        EventBus.getDefault().post(ReloadDataEvent())
 
-        if (t == "TB") {
-            page_tb!!.isSelected = true
-        } else if (t == "LR") {
-            page_lr!!.isSelected = true
-        } else if (t == "SCROLL") {
-            page_scroll!!.isSelected = true
+        if (mConfig.pageType == "TB") {
+            page_tb!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageTbPressIcon, 0, 0, 0)
+            page_lr!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageLrNormalIcon, 0, 0, 0)
+            page_scroll!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageScrollNormalIcon, 0, 0, 0)
+            page_tb!!.setTextColor(ThemeConfig._mainViewerColor)
+            page_lr!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            page_scroll!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+        } else if (mConfig.pageType == "LR") {
+            page_tb!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageTbNormalIcon, 0, 0, 0)
+            page_lr!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageLrPressIcon, 0, 0, 0)
+            page_scroll!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageScrollNormalIcon, 0, 0, 0)
+            page_tb!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            page_lr!!.setTextColor(ThemeConfig._mainViewerColor)
+            page_scroll!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+        } else {
+            page_tb!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageTbNormalIcon, 0, 0, 0)
+            page_lr!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageLrNormalIcon, 0, 0, 0)
+            page_scroll!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageScrollPressIcon, 0, 0, 0)
+            page_tb!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            page_lr!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            page_scroll!!.setTextColor(ThemeConfig._mainViewerColor)
         }
+        EventBus.getDefault().post(ReloadDataEvent())
     }
 
     private fun setTheme(type:String = "") {
@@ -823,41 +925,246 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             }
         }
 
-        if (t == "WHITE" || t == "GRAY") {
-//            setTheme(R.style.FolioDayTheme)
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        } else {
-//            setTheme(R.style.FolioNightTheme)
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        }
-
         mConfig.currentTheme = t
         AppUtil.saveConfig(this, mConfig)
-        EventBus.getDefault().post(ReloadDataEvent())
 
-        when (t) {
-            "WHITE" -> btnThemeWhite!!.isSelected = true
-            "GRAY" -> btnThemeGray!!.isSelected = true
-            "GREEN" -> btnThemeGreen!!.isSelected = true
-            "WOOD" -> btnThemeWood!!.isSelected = true
-            "BLACK" -> btnThemeBlack!!.isSelected = true
-            else -> { // Note the block
-                print("x is neither 1 nor 2")
-            }
+        if (currentFragment != null) {
+            currentFragment!!.setTheme(mConfig.currentTheme)
+            updateTheme()
         }
+        EventBus.getDefault().post(ReloadDataEvent())
+    }
+
+    private fun showSetting() {
+        llSetting!!.visibility = View.VISIBLE
+        llSetting!!.isClickable = true
+    }
+
+    private fun hideSetting() {
+        llSetting!!.visibility = View.GONE
+        hideDetailSetting()
+    }
+
+    private fun hideDetailSetting() {
+        llSettingDetail!!.visibility = View.GONE
+        btnLayerExpand!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingBtnCloseNormalIcon, 0, 0, 0)
+        btnLayerExpand!!.setText(R.string.layout_setting_detail_open)
+    }
+
+    private fun updateTheme() {
+        Log.e(LOG_TAG, "updateTheme : " + mConfig.currentTheme)
+        ThemeConfig.setTheme(mConfig)
+
+        // Top //
+        actionBar!!.setBackgroundDrawable(ColorDrawable(ThemeConfig._baseBackgroundColor))
+
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_nav_back_gr)
+        toolbar!!.navigationIcon = drawable
+        toolbar_title!!.setTextColor(ThemeConfig._mainTitleTextColor)
+
+        // Bottom //
+        ll_bottom_bar!!.setBackgroundColor(ThemeConfig._baseBackgroundColor)
+        ll_bottom_seekbar!!.setBackgroundColor(ThemeConfig._baseBackgroundColor)
+        btnList!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuListNormalIcon, 0, 0)
+        btnList!!.setTextColor(ThemeConfig._bottomMenuTextColor)
+        btnRecord!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuRecordNormalIcon, 0, 0)
+        btnRecord!!.setTextColor(ThemeConfig._bottomMenuTextColor)
+        btnComment!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuCommentNormalIcon, 0, 0)
+        btnComment!!.setTextColor(ThemeConfig._bottomMenuTextColor)
+        btnReview!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuReviewNormalIcon, 0, 0)
+        btnReview!!.setTextColor(ThemeConfig._bottomMenuTextColor)
+        btnPrevBook!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._bottomMenuPrevBookIcon, 0, 0, 0)
+        btnPrevBook!!.setTextColor(ThemeConfig._bottomMenuTextColor)
+        btnNextBook!!.setCompoundDrawablesWithIntrinsicBounds(0, 0, ThemeConfig._bottomMenuNextBookIcon, 0)
+        btnNextBook!!.setTextColor(ThemeConfig._bottomMenuTextColor)
+        devideLine!!.setBackgroundColor(ThemeConfig._bottomDevideLineColor)
+
+        // Bottom Seekbar //
+        ll_bottom_seekbar!!.setBackgroundColor(ThemeConfig._baseBackgroundColor)
+        pageSeekBar!!.background = null
+        pageSeekBar!!.progressDrawable.setTint(ThemeConfig._seekBarProgressColor)
+        pageSeekBar!!.thumb.setTint(ThemeConfig._seekBarThumbColor)
+
+        // Setting Layer //
+        llTopSetting!!.setBackgroundColor(ThemeConfig._baseBackgroundColor)
+        llSettingDetail!!.setBackgroundColor(ThemeConfig._baseBackgroundColor)
+        llTopSettingBottom!!.setBackgroundColor(ThemeConfig._baseBackgroundColor)
+        btnLayerExpand!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingBtnCloseNormalIcon, 0, 0, 0)
+        btnLayerExpand!!.setTextColor(ThemeConfig._settingBtnCloseTextColor)
+        iconSettingClose!!.setBackgroundColor(ThemeConfig._settingIconCloseColor)
+
+        txtSettingFontStyle!!.setTextColor(ThemeConfig._settingTitleTextColor)
+        fontSpinner!!.setBackgroundColor(ThemeConfig._settingFontStyleSpinnerBackgroundColor)
+        fontSpinner!!.setBackgroundResource(ThemeConfig._settingFontSpinnerStyle)
+
+        txtSettingFontSize!!.setTextColor(ThemeConfig._settingTitleTextColor)
+        btnFontSizeMinus!!.setImageResource(ThemeConfig._settingFontSmallIcon)
+        btnFontSizeMinus!!.setBackgroundResource(ThemeConfig._settingFontSmallBox)
+        tvFontSizeMinus!!.setTextColor(ThemeConfig._settingFontSmallTextColor)
+        tvFontSizeCenter!!.setTextColor(ThemeConfig._settingFontCenterTextColor)
+        tvFontSizePlus!!.setTextColor(ThemeConfig._settingFontSmallTextColor)
+        btnFontSizePlus!!.setImageResource(ThemeConfig._settingFontBigIcon)
+        btnFontSizePlus!!.setBackgroundResource(ThemeConfig._settingFontBigBox)
+
+        txtSettingFontLineSpace!!.setTextColor(ThemeConfig._settingTitleTextColor)
+        btnFontLineSpaceMinus!!.setImageResource(ThemeConfig._settingFontSmallIcon)
+        btnFontLineSpaceMinus!!.setBackgroundResource(ThemeConfig._settingFontSmallBox)
+        tvFontLineSpaceMinus!!.setTextColor(ThemeConfig._settingFontSmallTextColor)
+        tvFontLineSpaceCenter!!.setTextColor(ThemeConfig._settingFontCenterTextColor)
+        tvFontLineSpacePlus!!.setTextColor(ThemeConfig._settingFontSmallTextColor)
+        btnFontLineSpacePlus!!.setImageResource(ThemeConfig._settingFontBigIcon)
+        btnFontLineSpacePlus!!.setBackgroundResource(ThemeConfig._settingFontBigBox)
+
+        txtSettingFontWhiteSpace!!.setTextColor(ThemeConfig._settingTitleTextColor)
+        btnFontWhiteSpaceMinus!!.setImageResource(ThemeConfig._settingFontSmallIcon)
+        btnFontWhiteSpaceMinus!!.setBackgroundResource(ThemeConfig._settingFontSmallBox)
+        tvFontWhiteSpaceMinus!!.setTextColor(ThemeConfig._settingFontSmallTextColor)
+        tvFontWhiteSpaceCenter!!.setTextColor(ThemeConfig._settingFontCenterTextColor)
+        tvFontWhiteSpacePlus!!.setTextColor(ThemeConfig._settingFontSmallTextColor)
+        btnFontWhiteSpacePlus!!.setImageResource(ThemeConfig._settingFontSmallIcon)
+        btnFontWhiteSpacePlus!!.setBackgroundResource(ThemeConfig._settingFontBigBox)
+
+        txtSettingAlignment!!.setTextColor(ThemeConfig._settingTitleTextColor)
+        if (mConfig.alignment == "LEFT") {
+            alignment_left!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingAlignmentLeftPressIcon, 0, 0, 0)
+            alignment_both!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingAlignmentBothNormalIcon, 0, 0, 0)
+            alignment_left!!.setTextColor(ThemeConfig._mainViewerColor)
+            alignment_both!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+        } else {
+            alignment_left!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingAlignmentLeftNormalIcon, 0, 0, 0)
+            alignment_both!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingAlignmentBothPressIcon, 0, 0, 0)
+            alignment_left!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            alignment_both!!.setTextColor(ThemeConfig._mainViewerColor)
+        }
+
+        txtSettingPage!!.setTextColor(ThemeConfig._settingTitleTextColor)
+        if (mConfig.pageType == "TB") {
+            page_tb!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageTbPressIcon, 0, 0, 0)
+            page_lr!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageLrNormalIcon, 0, 0, 0)
+            page_scroll!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageScrollNormalIcon, 0, 0, 0)
+            page_tb!!.setTextColor(ThemeConfig._mainViewerColor)
+            page_lr!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            page_scroll!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+        } else if (mConfig.pageType == "LR") {
+            page_tb!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageTbNormalIcon, 0, 0, 0)
+            page_lr!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageLrPressIcon, 0, 0, 0)
+            page_scroll!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageScrollNormalIcon, 0, 0, 0)
+            page_tb!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            page_lr!!.setTextColor(ThemeConfig._mainViewerColor)
+            page_scroll!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+        } else {
+            page_tb!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageTbNormalIcon, 0, 0, 0)
+            page_lr!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageLrNormalIcon, 0, 0, 0)
+            page_scroll!!.setCompoundDrawablesWithIntrinsicBounds(ThemeConfig._settingPageScrollPressIcon, 0, 0, 0)
+            page_tb!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            page_lr!!.setTextColor(ThemeConfig._settingMenuTextNormalColor)
+            page_scroll!!.setTextColor(ThemeConfig._mainViewerColor)
+        }
+
+        txtSettingTheme!!.setTextColor(ThemeConfig._settingTitleTextColor)
+        if (mConfig.currentTheme == "WHITE") {
+            btnThemeWhite!!.setBackgroundResource(ThemeConfig._settingThemeWhitePressIcon)
+            btnThemeGray!!.setBackgroundResource(ThemeConfig._settingThemeGrayNormalIcon)
+            btnThemeGreen!!.setBackgroundResource(ThemeConfig._settingThemeGreenNormalIcon)
+            btnThemeWood!!.setBackgroundResource(ThemeConfig._settingThemeWoodNormalIcon)
+            btnThemeBlack!!.setBackgroundResource(ThemeConfig._settingThemeBlackNormalIcon)
+        } else if (mConfig.currentTheme == "GRAY") {
+            btnThemeWhite!!.setBackgroundResource(ThemeConfig._settingThemeWhiteNormalIcon)
+            btnThemeGray!!.setBackgroundResource(ThemeConfig._settingThemeGrayPressIcon)
+            btnThemeGreen!!.setBackgroundResource(ThemeConfig._settingThemeGreenNormalIcon)
+            btnThemeWood!!.setBackgroundResource(ThemeConfig._settingThemeWoodNormalIcon)
+            btnThemeBlack!!.setBackgroundResource(ThemeConfig._settingThemeBlackNormalIcon)
+        } else if (mConfig.currentTheme == "GREEN") {
+            btnThemeWhite!!.setBackgroundResource(ThemeConfig._settingThemeWhiteNormalIcon)
+            btnThemeGray!!.setBackgroundResource(ThemeConfig._settingThemeGrayNormalIcon)
+            btnThemeGreen!!.setBackgroundResource(ThemeConfig._settingThemeGreenPressIcon)
+            btnThemeWood!!.setBackgroundResource(ThemeConfig._settingThemeWoodNormalIcon)
+            btnThemeBlack!!.setBackgroundResource(ThemeConfig._settingThemeBlackNormalIcon)
+        } else if (mConfig.currentTheme == "WOOD") {
+            btnThemeWhite!!.setBackgroundResource(ThemeConfig._settingThemeWhiteNormalIcon)
+            btnThemeGray!!.setBackgroundResource(ThemeConfig._settingThemeGrayNormalIcon)
+            btnThemeGreen!!.setBackgroundResource(ThemeConfig._settingThemeGreenNormalIcon)
+            btnThemeWood!!.setBackgroundResource(ThemeConfig._settingThemeWoodPressIcon)
+            btnThemeBlack!!.setBackgroundResource(ThemeConfig._settingThemeBlackNormalIcon)
+        } else {
+            btnThemeWhite!!.setBackgroundResource(ThemeConfig._settingThemeWhiteNormalIcon)
+            btnThemeGray!!.setBackgroundResource(ThemeConfig._settingThemeGrayNormalIcon)
+            btnThemeGreen!!.setBackgroundResource(ThemeConfig._settingThemeGreenNormalIcon)
+            btnThemeWood!!.setBackgroundResource(ThemeConfig._settingThemeWoodNormalIcon)
+            btnThemeBlack!!.setBackgroundResource(ThemeConfig._settingThemeBlackPressIcon)
+        }
+
+        txtBrightness!!.setTextColor(ThemeConfig._settingTitleTextColor)
+
+        brightnessSeekbar!!.background = null
+        brightnessSeekbar!!.progressDrawable.setTint(ThemeConfig._seekBarProgressColor)
+        brightnessSeekbar!!.thumb.setTint(ThemeConfig._seekBarThumbColor)
+
+        if (mConfig.screenFilter == 1) {
+            btnBlueFilter!!.setBackgroundResource(ThemeConfig._settingScreenFilterPressBox)
+            btnBlueFilter!!.setImageResource(ThemeConfig._settingScreenFilterPressIcon)
+        } else {
+            btnBlueFilter!!.setBackgroundResource(ThemeConfig._settingScreenFilterNormalBox)
+            btnBlueFilter!!.setImageResource(ThemeConfig._settingScreenFilterNormalIcon)
+        }
+
+        // Search Bar //
+        mSearchBG!!.setBackgroundResource(ThemeConfig._searchBarEditBox)
+        mSearchEditBack!!.setBackgroundResource(ThemeConfig._searchBarEditTextStyle)
+        mSearchIcon!!.setImageResource(ThemeConfig._searchBarSearchIcon)
+        mSearchEdit!!.setTextColor(ThemeConfig._searchBarEditTextColor)
+        mSearchButton!!.setBackgroundResource(ThemeConfig._searchBarButtonStyle)
+        mSearchButton!!.setTextColor(ThemeConfig._searchBarButtonTextColor)
+
+        if (tlIndex != null) {
+            tlIndex!!.setBackgroundColor(ThemeConfig._baseBackgroundColor)
+            tlIndex!!.setSelectedTabIndicatorColor(ThemeConfig._mainViewerColor)
+            tlIndex!!.setTabTextColors(
+                ThemeConfig._leftLayerTabNormalTextColor,
+                ThemeConfig._leftLayerTabSelectedTextColor
+            )
+        }
+
+        // Left Layer //
+//        leftBackground!!.setBackgroundColor(ThemeConfig._leftLayerBackgroundColor)
+//        leftLayoutTitle!!.setTextColor(ThemeConfig._leftLayerTitleTextColor)
+//        leftLayoutAuthor!!.setTextColor(ThemeConfig._leftLayerAuthorTextColor)
+//        leftLayoutDesc!!.setTextColor(ThemeConfig._leftLayerDescTextColor)
+//        btn_more!!.setCompoundDrawablesWithIntrinsicBounds(0, 0, ThemeConfig._leftLayerMoreIcon, 0)
+//        btn_more!!.setTextColor(ThemeConfig._leftLayerMoreTextColor)
+    }
+
+    override fun setPageInfo(currentPage: Int, totalPage: Int) {
+        pageSeekBar!!.max = totalPage
+        pageSeekBar!!.progress = currentPage+1
+
+        val spannableString = SpannableString("${currentPage+1} / $totalPage")
+        val from = 0
+        val to = from + currentPage.toString().length
+        spannableString.setSpan(StyleSpan(Typeface.BOLD), from, to, 0)
+        spannableString.setSpan(ForegroundColorSpan(ThemeConfig._seekBarCurrentPageTextColor), from, to, 0)
+        pageTextView!!.text = spannableString
     }
 
     fun setMenuForFragment(flag: Boolean) {
-        btnList!!.isSelected = false
-        btnRecord!!.isSelected = false
-        btnComment!!.isSelected = false
-        btnReview!!.isSelected = false
+        btnRecord!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuRecordNormalIcon, 0, 0)
+        btnRecord!!.setTextColor(ThemeConfig._bottomMenuTextColor)
+        btnComment!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuCommentNormalIcon, 0, 0)
+        btnComment!!.setTextColor(ThemeConfig._bottomMenuTextColor)
+        btnReview!!.setCompoundDrawablesWithIntrinsicBounds(0, ThemeConfig._bottomMenuReviewNormalIcon, 0, 0)
+        btnReview!!.setTextColor(ThemeConfig._bottomMenuTextColor)
 
         if (fl_fragment_page != null) {
             if (flag) {
                 fl_fragment_page!!.visibility = View.VISIBLE
             } else {
                 fl_fragment_page!!.visibility = View.GONE
+            }
+        }
+
+        if (!flag) {
+            if (ll_bottom_seekbar != null) {
+                ll_bottom_seekbar!!.visibility = View.VISIBLE
             }
         }
     }
@@ -899,33 +1206,20 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         val itemId = item.itemId
 
         if (itemId == android.R.id.home) {
-            Log.e(LOG_TAG, "-> onOptionsItemSelected -> drawer")
             finish()
-//            startContentHighlightActivity()
             return true
         } else if (itemId == R.id.itemSetting) {
-            Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-
             if (mSearchMenu!!.visibility == View.VISIBLE) mSearchMenu!!.visibility = View.GONE
 
             if (llSetting!!.visibility == View.VISIBLE) {
-                llSetting!!.visibility = View.GONE
-                llSettingDetail!!.visibility = View.GONE
-                btnLayerExpand!!.isSelected = false
+                hideSetting()
             } else {
-                llSetting!!.visibility = View.VISIBLE
-                llSetting!!.isClickable = true
+                showSetting()
             }
-
-//            showConfigBottomSheetDialogFragment()
             return true
         } else if (itemId == R.id.itemSearch) {
-            Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-
             if (llSetting!!.visibility == View.VISIBLE) {
-                llSetting!!.visibility = View.GONE
-                llSettingDetail!!.visibility = View.GONE
-                btnLayerExpand!!.isSelected = false
+                hideSetting()
             }
 
             if (mSearchMenu!!.visibility == View.VISIBLE) {
@@ -936,9 +1230,23 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             }
             return true
         } else if (itemId == R.id.itemBookmark) {
-            Log.e(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
-            Log.e(LOG_TAG, "mFolioPageViewPager!!.currentItem :::::" + mFolioPageViewPager!!.currentItem.toString())
-//            showConfigBottomSheetDialogFragment()
+            val readLocator = currentFragment!!.getLastReadLocator()
+            bookmarkReadLocator = readLocator
+
+            if (currentFragment != null) {
+                currentFragment!!.getCurrentText()
+            }
+
+            Log.e(LOG_TAG, "CONTENT : ${readLocator!!.toJson().toString()}" )
+
+
+            val contents = "TestBookMark"
+
+            var idx: Int = mFolioPageViewPager!!.currentItem-1
+            if (idx < 0) idx = 0
+            Log.e(LOG_TAG, "CURRENT : $idx" )
+
+            BookmarkTable().insertBookmark(mBookId, contents, idx, bookmarkReadLocator!!.toJson().toString())
         }
 
         return super.onOptionsItemSelected(item)
@@ -946,27 +1254,19 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
     fun setBookmarkPage(data : Intent) {
         val bookmarkImpl = data.getParcelableExtra<BookmarkImpl>(BOOKMARK_ITEM)
-        Log.e(LOG_TAG, "bookmarkImpl : $bookmarkImpl")
-        currentChapterIndex = bookmarkImpl.pageNumber
+        val locator: ReadLocator? = ReadLocator.fromJson(bookmarkImpl.locator)
+        currentChapterIndex = bookmarkImpl.chapterNo+1
         mFolioPageViewPager!!.currentItem = currentChapterIndex
         val folioPageFragment = currentFragment ?: return
-        folioPageFragment.scrollToHighlightId(bookmarkImpl.rangy)
+        folioPageFragment.scrollToCFI(locator!!.locations.cfi!!)
     }
 
     fun setHighlightPage(data : Intent) {
         val highlightImpl = data.getParcelableExtra<HighlightImpl>(HIGHLIGHT_ITEM)
-        Log.e(LOG_TAG, "highlightImpl : $highlightImpl")
-        currentChapterIndex = highlightImpl.pageNumber
+        currentChapterIndex = highlightImpl.pageNumber+1
         mFolioPageViewPager!!.currentItem = currentChapterIndex
         val folioPageFragment = currentFragment ?: return
         folioPageFragment.scrollToHighlightId(highlightImpl.rangy)
-    }
-
-    fun showConfigBottomSheetDialogFragment() {
-        ConfigBottomSheetDialogFragment().show(
-            supportFragmentManager,
-            ConfigBottomSheetDialogFragment.LOG_TAG
-        )
     }
 
     private fun setupBook() {
@@ -987,13 +1287,14 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         bookFileName = FileUtil.getEpubFilename(this, mEpubSourceType!!, mEpubFilePath, mEpubRawId)
 
         val path = FileUtil.saveEpubFileAndLoadLazyBook(this, mEpubSourceType, mEpubFilePath, mEpubRawId, bookFileName)
+        Log.e(LOG_TAG, "path -> $path")
         val extension: Publication.EXTENSION
         var extensionString: String? = null
         try {
             extensionString = FileUtil.getExtensionUppercase(path)
             extension = Publication.EXTENSION.valueOf(extensionString)
         } catch (e: IllegalArgumentException) {
-            throw Exception("-> Unknown book file extension `$extensionString`", e)
+            throw Exception("-> Unknown book file extension ```$extensionString`", e)
         }
 
         pubBox = when (extension) {
@@ -1010,7 +1311,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             }
         }
 
-        portNumber = intent.getIntExtra(FolioReader.EXTRA_PORT_NUMBER, Constants.DEFAULT_PORT_NUMBER)
+        portNumber = intent.getIntExtra(FolioReader.EXTRA_PORT_NUMBER, DEFAULT_PORT_NUMBER)
         portNumber = AppUtil.getAvailablePortNumber(portNumber)
 
         r2StreamerServer = Server(portNumber)
@@ -1030,6 +1331,15 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         spine = publication.readingOrder
         title = publication.metadata.title
         toolbar_title!!.text = title
+//        Log.e(LOG_TAG, "cover : ${publication.coverLink!!.href}")
+//        Log.e(LOG_TAG, "cover : ${publication.coverLink!!.title}")
+//        Log.e(LOG_TAG, "cover : ${publication.coverLink!!.toString()}")
+
+        Log.e(LOG_TAG, "cover : ${spine!!.size}, $spine")
+        for (li in spine as MutableList<Link>) {
+            Log.e(LOG_TAG, "link : ${li.href}")
+        }
+
 
         if (mBookId == null) {
             if (!publication.metadata.identifier.isEmpty()) {
@@ -1055,6 +1365,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             searchUri = Uri.parse(streamerUrl + "search")
 
         configFolio()
+        updateTheme()
     }
 
     override fun getStreamerUrl(): String {
@@ -1125,12 +1436,12 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         if (!distractionFreeMode)
             bottomDistraction = appBarLayout!!.navigationBarHeight
 
-        when (unit) {
-            DisplayUnit.PX -> return bottomDistraction
+        return when (unit) {
+            DisplayUnit.PX -> bottomDistraction
 
             DisplayUnit.DP -> {
                 bottomDistraction /= density.toInt()
-                return bottomDistraction
+                bottomDistraction
             }
 
             else -> throw IllegalArgumentException("-> Illegal argument -> unit = $unit")
@@ -1182,8 +1493,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
     }
 
     override fun toggleSystemUI() {
-        Log.e(LOG_TAG, "-> toggleSystemUI -> distractionFreeMode = $distractionFreeMode")
-
         if (mSearchMenu != null && mSearchMenu!!.visibility == View.VISIBLE) {
             mSearchMenu!!.visibility = View.GONE
         } else if (ll_left_layer != null && ll_left_layer!!.visibility == View.VISIBLE) {
@@ -1191,8 +1500,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             ll_left_layer!!.visibility = View.GONE
         } else if (llSetting != null && llSetting!!.visibility == View.VISIBLE) {
             llSetting!!.visibility = View.GONE
-            llSettingDetail!!.visibility = View.GONE
-            btnLayerExpand!!.isSelected = false
+            hideDetailSetting()
         } else {
             if (distractionFreeMode) {
                 showSystemUI()
@@ -1214,6 +1522,10 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
         if (ll_bottom_bar != null) {
             ll_bottom_bar!!.visibility = View.VISIBLE
         }
+
+        if (ll_bottom_seekbar != null) {
+            ll_bottom_seekbar!!.visibility = View.VISIBLE
+        }
     }
 
     private fun hideSystemUI() {
@@ -1225,6 +1537,10 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
         if (ll_bottom_bar != null) {
             ll_bottom_bar!!.visibility = View.GONE
+        }
+
+        if (ll_bottom_seekbar != null) {
+            ll_bottom_seekbar!!.visibility = View.GONE
         }
     }
 
@@ -1289,6 +1605,16 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
                 mFolioPageViewPager!!.currentItem = currentChapterIndex
                 val folioPageFragment = currentFragment ?: return
                 folioPageFragment.scrollToHighlightId(highlightImpl.rangy)
+            } else if(type == BOOKMARK_SELECTED){
+                val bookmark = data.getSerializableExtra(BOOKMARK_ITEM) as HashMap<*, *>
+                bookmarkReadLocator = ReadLocator.fromJson(bookmark.get("readlocator").toString())
+                currentChapterIndex = getChapterIndex(bookmarkReadLocator)
+                mFolioPageViewPager!!.currentItem = currentChapterIndex
+                val folioPageFragment = currentFragment
+                val handler_time = Handler()
+                handler_time.postDelayed({
+                    folioPageFragment!!.scrollToCFI(bookmarkReadLocator!!.locations.cfi.toString());
+                }, 1000)
             }
         }
     }
@@ -1314,7 +1640,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
 
     private fun configFolio() {
         mFolioPageViewPager = findViewById(R.id.folioPageViewPager)
-        // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
         mFolioPageViewPager!!.setOnPageChangeListener(object : DirectionalViewpager.OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
@@ -1363,7 +1688,6 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback {
             val folioPageFragment = currentFragment ?: return
             folioPageFragment.highlightSearchLocator(searchLocator!!)
             searchLocator = null
-
         } else {
             val readLocator: ReadLocator?
             if (savedInstanceState == null) {

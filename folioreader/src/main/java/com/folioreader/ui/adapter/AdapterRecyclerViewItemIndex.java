@@ -11,8 +11,11 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.folioreader.Config;
 import com.folioreader.R;
+import com.folioreader.ThemeConfig;
 import com.folioreader.ui.activity.FolioActivity;
+import com.folioreader.util.AppUtil;
 
 import org.readium.r2.shared.Link;
 import org.readium.r2.shared.Publication;
@@ -20,11 +23,11 @@ import org.readium.r2.shared.Publication;
 import java.util.Objects;
 
 public class AdapterRecyclerViewItemIndex extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private final String LOG_TAG = "AdaptIndexFragment";
+    private final String LOG_TAG = "AdaptIndexFragment!";
 
     private final Context mContext;
-    private Publication mPublication = null;
-    private String mBookId = "";
+    private final Publication mPublication;
+    private final String mBookId;
 
     public AdapterRecyclerViewItemIndex(Context context, Publication publication, String bookId) {
         this.mContext = context;
@@ -52,10 +55,6 @@ public class AdapterRecyclerViewItemIndex extends RecyclerView.Adapter<RecyclerV
         final Link tocLink = mPublication.getTableOfContents().get(position);
         hd.textViewTitle.setText(tocLink.getTitle());
 
-        if (Objects.equals(tocLink.getHref(), mBookId)) {
-            hd.item_index.setSelected(true);
-        }
-
         hd.item_index.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,6 +62,16 @@ public class AdapterRecyclerViewItemIndex extends RecyclerView.Adapter<RecyclerV
                 ((FolioActivity)mContext).onMoveCheckedChapter(Objects.requireNonNull(tocLink.getHref()));
             }
         });
+
+        if (Objects.equals(tocLink.getHref(), mBookId)) {
+            hd.item_index.setBackgroundColor(ThemeConfig._leftLayerRecyclerViewItemBackgroundColor);
+        } else {
+            hd.item_index.setBackgroundColor(ThemeConfig._baseBackgroundColor);
+        }
+
+        hd.textViewIndex.setTextColor(ThemeConfig._leftLayerRecyclerViewItemTextColor);
+        hd.textViewTitle.setTextColor(ThemeConfig._leftLayerRecyclerViewItemTextColor);
+        hd.vDevider.setBackgroundColor(ThemeConfig._leftLayerRecyclerViewItemDeviderColor);
     }
 
     @Override
@@ -73,6 +82,7 @@ public class AdapterRecyclerViewItemIndex extends RecyclerView.Adapter<RecyclerV
     public static class IndexHolder extends RecyclerView.ViewHolder {
         private final ConstraintLayout item_index;
         private final TextView textViewIndex, textViewTitle;
+        private final View vDevider;
 
         public IndexHolder(@NonNull final View itemView) {
             super(itemView);
@@ -80,6 +90,7 @@ public class AdapterRecyclerViewItemIndex extends RecyclerView.Adapter<RecyclerV
             item_index = itemView.findViewById(R.id.item_index);
             textViewIndex = itemView.findViewById(R.id.textViewIndex);
             textViewTitle = itemView.findViewById(R.id.textViewTitle);
+            vDevider = itemView.findViewById(R.id.devide);
         }
     }
 }

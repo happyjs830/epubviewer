@@ -68,6 +68,7 @@
     <color name="layout_setting_minus_button_border">#DBDFE4</color>
     <color name="layout_setting_plus_button_border">#DBDFE4</color>
     <color name="layout_setting_seekbar_background">#DBDFE4</color>
+    <color name="layout_setting_bottom_handle_color">#DBDFE4</color>
     <color name="setting_theme_white_selected_border">#20459E</color>
     <color name="setting_theme_white_normal_border">#DBDFE4</color>
     <color name="setting_theme_gray_selected_border">#20459E</color>

@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     app:behavior_hideable="true"
     app:behavior_peekHeight="100dp"
-    app:behavior_draggable="false"
     android:background="@android:color/transparent"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 

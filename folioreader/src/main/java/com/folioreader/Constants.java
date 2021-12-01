@@ -20,15 +20,9 @@ public class Constants {
     public static final String DEFAULT_STREAMER_URL = LOCALHOST + ":" + DEFAULT_PORT_NUMBER + "/";
 
     public static final String SELECTED_WORD = "selected_word";
-    public static final String DICTIONARY_BASE_URL = "https://api.pearson.com/v2/dictionaries/entries?headword=";
-    public static final String WIKIPEDIA_API_URL = "https://en.wikipedia.org/w/api.php?action=opensearch&namespace=0&format=json&search=";
-    public static final int FONT_ANDADA = 1;
-    public static final int FONT_LATO = 2;
-    public static final int FONT_LORA = 3;
-    public static final int FONT_RALEWAY = 4;
-    public static final int FONT_NANUM_GOTHIC = 5;
-    public static final int FONT_NANUM_MYEONGJO = 6;
-    public static final int FONT_BON_GOTHIC = 7;
+    public static final int FONT_NANUM_GOTHIC = 0;
+    public static final int FONT_NANUM_MYEONGJO = 1;
+    public static final int FONT_BON_GOTHIC = 2;
     public static final String DATE_FORMAT = "MMM dd, yyyy | HH:mm";
     public static final String ASSET = "file:///android_asset/";
     public static final int WRITE_EXTERNAL_STORAGE_REQUEST = 102;

@@ -52,29 +52,28 @@ public final class HtmlUtil {
         jsPath = jsPath + String.format(context.getString(R.string.script_tag),
                 "file:///android_asset/js/readium-cfi.umd.js") + "\n";
 
-        jsPath = jsPath + String.format(context.getString(R.string.script_tag_method_call),
-                "setMediaOverlayStyleColors('#C0ED72','#C0ED72')") + "\n";
-
         jsPath = jsPath
                 + "<meta name=\"viewport\" content=\"height=device-height, user-scalable=no\" />";
 
         String toInject = "\n" + cssPath + "\n" + jsPath + "\n</head>";
         htmlContent = htmlContent.replace("</head>", toInject);
 
+        String classes = getFont(config.getFont());
+
+        classes += getTheme(config.getCurrentTheme());
+        classes += getSize(config.getFontSize());
+        classes += getLineSpace(config.getFontLineSpace());
+        classes += getWhiteSpace(config.getFontWhiteSpace());
+        classes += getAlignment(config.getAlignment());
+
+        htmlContent = htmlContent.replace("<html", "<html class=\"" + classes + "\"" +
+                " onclick=\"onClickHtml()\"");
+        return htmlContent;
+    }
+
+    public static String getFont(int font) {
         String classes = "";
-        switch (config.getFont()) {
-            case Constants.FONT_ANDADA:
-                classes = "andada";
-                break;
-            case Constants.FONT_LATO:
-                classes = "lato";
-                break;
-            case Constants.FONT_LORA:
-                classes = "lora";
-                break;
-            case Constants.FONT_RALEWAY:
-                classes = "raleway";
-                break;
+        switch (font) {
             case Constants.FONT_NANUM_GOTHIC:
                 classes = "nanum_gothic";
                 break;
@@ -87,90 +86,99 @@ public final class HtmlUtil {
             default:
                 break;
         }
+        return classes;
+    }
 
-        if (config.isNightMode()) {
-            classes += " nightMode";
-        }
-
-        switch (config.getCurrentTheme()) {
-            case "WHITE": classes += " theme-white"; break;
-            case "GRAY": classes += " theme-gray"; break;
-            case "GREEN": classes += " theme-green"; break;
-            case "WOOD": classes += " theme-wood"; break;
-            case "BLACK": classes += " theme-black"; break;
-        }
-
-        switch (config.getFontSize()) {
-            case 0: classes += " textSizeOne"; break;
-            case 1: classes += " textSizeOnePlus"; break;
-            case 2: classes += " textSizeTwo"; break;
-            case 3: classes += " textSizeTwoPlus"; break;
-            case 4: classes += " textSizeThree"; break;
-            case 5: classes += " textSizeThreePlus"; break;
-            case 6: classes += " textSizeFour"; break;
-            case 7: classes += " textSizeFourPlus"; break;
-            case 8: classes += " textSizeFive"; break;
-            case 9: classes += " textSizeFivePlus"; break;
-            case 10: classes += " textSizeSix"; break;
-            case 11: classes += " textSizeSixPlus"; break;
-            case 12: classes += " textSizeSeven"; break;
-            case 13: classes += " textSizeSevenPlus"; break;
-            case 14: classes += " textSizeEight"; break;
-            case 15: classes += " textSizeEightPlus"; break;
-            case 16: classes += " textSizeNine"; break;
-            case 17: classes += " textSizeNinePlus"; break;
-            case 18: classes += " textSizeTen"; break;
-            case 19: classes += " textSizeTenPlus"; break;
+    public static String getSize(int size) {
+        String classes = "";
+        switch (size) {
+            case 9: classes = " textSizeOne"; break;
+            case 10: classes = " textSizeOnePlus"; break;
+            case 11: classes = " textSizeTwo"; break;
+            case 12: classes = " textSizeTwoPlus"; break;
+            case 13: classes = " textSizeThree"; break;
+            case 14: classes = " textSizeThreePlus"; break;
+            case 15: classes = " textSizeFour"; break;
+            case 16: classes = " textSizeFourPlus"; break;
+            case 17: classes = " textSizeFive"; break;
+            case 18: classes = " textSizeFivePlus"; break;
+            case 19: classes = " textSizeSix"; break;
+            case 20: classes = " textSizeSixPlus"; break;
+            case 21: classes = " textSizeSeven"; break;
+            case 22: classes = " textSizeSevenPlus"; break;
+            case 23: classes = " textSizeEight"; break;
+            case 24: classes = " textSizeEightPlus"; break;
             default:
                 break;
         }
+        return classes;
+    }
 
-        switch (config.getFontLineSpace()/10) {
-            case 0: classes += " textLineHeightOne"; break;
-            case 1: classes += " textLineHeightOnePlus"; break;
-            case 2: classes += " textLineHeightTwo"; break;
-            case 3: classes += " textLineHeightTwoPlus"; break;
-            case 4: classes += " textLineHeightThree"; break;
-            case 5: classes += " textLineHeightThreePlus"; break;
-            case 6: classes += " textLineHeightFour"; break;
-            case 7: classes += " textLineHeightFourPlus"; break;
-            case 8: classes += " textLineHeightFive"; break;
-            case 9: classes += " textLineHeightFivePlus"; break;
-            case 10: classes += " textLineHeightSix"; break;
-            case 11: classes += " textLineHeightSixPlus"; break;
-            case 12: classes += " textLineHeightSeven"; break;
-            case 13: classes += " textLineHeightSevenPlus"; break;
-            case 14: classes += " textLineHeightEight"; break;
-            case 15: classes += " textLineHeightEightPlus"; break;
-            case 16: classes += " textLineHeightNine"; break;
-            case 17: classes += " textLineHeightNinePlus"; break;
-            case 18: classes += " textLineHeightTen"; break;
-            case 19: classes += " textLineHeightTenPlus"; break;
-            case 20: classes += " textLineHeightLast"; break;
+    public static String getLineSpace(int lineSpace) {
+        String classes = "";
+        switch (lineSpace) {
+            case 0: classes = " textLineHeightOne"; break;
+            case 10: classes = " textLineHeightOnePlus"; break;
+            case 20: classes = " textLineHeightTwo"; break;
+            case 30: classes = " textLineHeightTwoPlus"; break;
+            case 40: classes = " textLineHeightThree"; break;
+            case 50: classes = " textLineHeightThreePlus"; break;
+            case 60: classes = " textLineHeightFour"; break;
+            case 70: classes = " textLineHeightFourPlus"; break;
+            case 80: classes = " textLineHeightFive"; break;
+            case 90: classes = " textLineHeightFivePlus"; break;
+            case 100: classes = " textLineHeightSix"; break;
+            case 110: classes = " textLineHeightSixPlus"; break;
+            case 120: classes = " textLineHeightSeven"; break;
+            case 130: classes = " textLineHeightSevenPlus"; break;
+            case 140: classes = " textLineHeightEight"; break;
+            case 150: classes = " textLineHeightEightPlus"; break;
+            case 160: classes = " textLineHeightNine"; break;
+            case 170: classes = " textLineHeightNinePlus"; break;
+            case 180: classes = " textLineHeightTen"; break;
+            case 190: classes = " textLineHeightTenPlus"; break;
+            case 200: classes = " textLineHeightLast"; break;
             default:
                 break;
         }
+        return classes;
+    }
 
-        switch (config.getFontWhiteSpace()) {
-            case 0: classes += " textMarginOne"; break;
-            case 1: classes += " textMarginTwo"; break;
-            case 2: classes += " textMarginThree"; break;
-            case 3: classes += " textMarginFour"; break;
-            case 4: classes += " textMarginFive"; break;
-            case 5: classes += " textMarginSix"; break;
-            case 6: classes += " textMarginSeven"; break;
+    public static String getWhiteSpace(int whiteSpace) {
+        String classes = "";
+        switch (whiteSpace) {
+            case 0: classes = " textMarginOne"; break;
+            case 1: classes = " textMarginTwo"; break;
+            case 2: classes = " textMarginThree"; break;
+            case 3: classes = " textMarginFour"; break;
+            case 4: classes = " textMarginFive"; break;
+            case 5: classes = " textMarginSix"; break;
+            case 6: classes = " textMarginSeven"; break;
             default:
                 break;
         }
+        return classes;
+    }
 
-        if (config.getAlignment().equals("LEFT")) {
+    public static String getAlignment(String alignment) {
+        String classes = "";
+        if (alignment.equals("LEFT")) {
             classes += " textAlignmentLeft";
-        } else if (config.getAlignment().equals("BOTH")) {
+        } else if (alignment.equals("BOTH")) {
             classes += " textAlignmentBoth";
         }
+        return classes;
+    }
 
-        htmlContent = htmlContent.replace("<html", "<html class=\"" + classes + "\"" +
-                " onclick=\"onClickHtml()\"");
-        return htmlContent;
+    public static String getTheme(String theme) {
+        String classes = "";
+        switch (theme) {
+            case "WHITE": classes = " theme-white"; break;
+            case "GRAY": classes = " theme-gray"; break;
+            case "GREEN": classes = " theme-green"; break;
+            case "WOOD": classes = " theme-wood"; break;
+            case "BLACK": classes = " theme-black"; break;
+        }
+        return classes;
     }
 }

@@ -1,8 +1,12 @@
 package com.folioreader.ui.fragment
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
@@ -11,7 +15,9 @@ import android.os.Handler
 import android.os.Parcelable
 import android.text.TextUtils
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -30,7 +36,9 @@ import com.folioreader.model.HighlightImpl
 import com.folioreader.model.event.*
 import com.folioreader.model.locators.ReadLocator
 import com.folioreader.model.locators.SearchLocator
+import com.folioreader.model.sqlite.BookmarkTable
 import com.folioreader.model.sqlite.HighLightTable
+import com.folioreader.ui.activity.FolioActivity
 import com.folioreader.ui.activity.FolioActivityCallback
 import com.folioreader.ui.base.HtmlTask
 import com.folioreader.ui.base.HtmlTaskCallback
@@ -40,16 +48,18 @@ import com.folioreader.ui.view.LoadingView
 import com.folioreader.ui.view.VerticalSeekbar
 import com.folioreader.ui.view.WebViewPager
 import com.folioreader.util.AppUtil
-import com.folioreader.util.BookmarkUtil
 import com.folioreader.util.HighlightUtil
 import com.folioreader.util.UiUtil
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import org.json.JSONObject
 import org.readium.r2.shared.Link
 import org.readium.r2.shared.Locations
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 /**
  * Created by mahavir on 4/2/16.
@@ -114,7 +124,7 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
     private var mConfig: Config? = null
     private var mBookId: String? = null
     var searchLocatorVisible: SearchLocator? = null
-    private var mCurrentPage: Int? = null
+    private var mCurrentPage: Int = 0
 
     private lateinit var chapterUrl: Uri
 
@@ -253,10 +263,15 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
                 }
 
             uiHandler.post {
-                mWebview!!.loadDataWithBaseURL(
-                    mActivityCallback?.streamerUrl + path,
-                    HtmlUtil.getHtmlContent(mWebview!!.context, mHtmlString, mConfig!!), mimeType, "UTF-8", null
-                )
+                if (mWebview != null) {
+                    mWebview!!.loadDataWithBaseURL(
+                        mActivityCallback?.streamerUrl + path,
+                        HtmlUtil.getHtmlContent(mWebview!!.context, mHtmlString, mConfig!!),
+                        mimeType,
+                        "UTF-8",
+                        null
+                    )
+                }
             }
         }
     }
@@ -315,9 +330,46 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
 
         mWebview!!.setScrollListener(object : FolioWebView.ScrollListener {
             override fun onScrollChange(percent: Int) {
-
                 mScrollSeekbar!!.setProgressAndThumb(percent)
                 updatePagesLeftText(percent)
+            }
+        })
+
+        var touchY: Float = 0f
+        mWebview!!.setOnTouchListener(View.OnTouchListener { v, event ->
+            if (mConfig!!.pageType == "TB") {
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    touchY = event.rawY
+                } else if (event.action == MotionEvent.ACTION_UP) {
+                    var y = event.rawY
+                    if (touchY - y > ConvertIntoPixel(5)) {
+                        ObjectAnimator.ofInt(
+                            mWebview!!,
+                            "scrollY",
+                            (mCurrentPage) * mWebview!!.webViewHeight
+                        ).apply {
+                            duration = 250
+                            start()
+                            return@apply
+                        }
+                    } else if (y - touchY > ConvertIntoPixel(5)) {
+                        Log.e(LOG_TAG, "PREV PAGE")
+                        ObjectAnimator.ofInt(
+                            mWebview!!,
+                            "scrollY",
+                            ((mCurrentPage - 1) * mWebview!!.webViewHeight)
+                        ).apply {
+                            duration = 250
+                            start()
+                            return@apply
+                        }
+                    }
+                } else if (event.action == MotionEvent.ACTION_MOVE) {
+                    return@OnTouchListener false
+                }
+                return@OnTouchListener false
+            } else {
+                return@OnTouchListener true
             }
         })
 
@@ -487,10 +539,10 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
                 return true
 
             if (TextUtils.isDigitsOnly(message)) {
-                try {
-                    mTotalMinutes = Integer.parseInt(message)
+                mTotalMinutes = try {
+                    Integer.parseInt(message)
                 } catch (e: NumberFormatException) {
-                    mTotalMinutes = 0
+                    0
                 }
 
             } else {
@@ -516,7 +568,7 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
     }
 
     fun getLastReadLocator(): ReadLocator? {
-        Log.v(LOG_TAG, "-> getLastReadLocator -> " + spineItem.href!!)
+        Log.e(LOG_TAG, "-> getLastReadLocator -> " + spineItem.href!!)
         try {
             synchronized(this) {
                 mWebview!!.loadUrl(getString(R.string.callComputeLastReadCfi))
@@ -550,7 +602,7 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
 
     @JavascriptInterface
     fun setHorizontalPageCount(horizontalPageCount: Int) {
-        Log.v(
+        Log.e(
             LOG_TAG, "-> setHorizontalPageCount = " + horizontalPageCount
                     + " -> " + spineItem.href
         )
@@ -597,9 +649,9 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
 
     private fun updatePagesLeftText(scrollY: Int) {
         try {
-            val currentPage = (Math.ceil(scrollY.toDouble() / mWebview!!.webViewHeight) + 1).toInt()
+            val currentPage = (ceil(scrollY.toDouble() / mWebview!!.webViewHeight)).toInt()
             mCurrentPage = currentPage
-            val totalPages = Math.ceil(mWebview!!.contentHeightVal.toDouble() / mWebview!!.webViewHeight).toInt()
+            val totalPages = ceil(mWebview!!.contentHeightVal.toDouble() / mWebview!!.webViewHeight).toInt()
             val pagesRemaining = totalPages - currentPage
             val pagesRemainingStrFormat = if (pagesRemaining > 1)
                 getString(R.string.pages_left)
@@ -610,20 +662,23 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
                 pagesRemainingStrFormat, pagesRemaining
             )
 
-            val minutesRemaining = Math.ceil((pagesRemaining * mTotalMinutes).toDouble() / totalPages).toInt()
-            val minutesRemainingStr: String
-            if (minutesRemaining > 1) {
-                minutesRemainingStr = String.format(
+            val minutesRemaining = ceil((pagesRemaining * mTotalMinutes).toDouble() / totalPages).toInt()
+            val minutesRemainingStr: String = if (minutesRemaining > 1) {
+                String.format(
                     Locale.US, getString(R.string.minutes_left),
                     minutesRemaining
                 )
             } else if (minutesRemaining == 1) {
-                minutesRemainingStr = String.format(
+                String.format(
                     Locale.US, getString(R.string.minute_left),
                     minutesRemaining
                 )
             } else {
-                minutesRemainingStr = getString(R.string.less_than_minute)
+                getString(R.string.less_than_minute)
+            }
+
+            if (mActivityCallback != null) {
+                mActivityCallback!!.setPageInfo(currentPage, totalPages)
             }
 
             mMinutesLeftTextView!!.text = minutesRemainingStr
@@ -664,6 +719,13 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
 
             }
         })
+    }
+
+    private fun ConvertIntoPixel(dp: Int) : Int{
+        val r: Resources = context!!.resources
+//        Resources r = context.getResources();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), r.getDisplayMetrics())
+            .roundToInt();
     }
 
     override fun fadeInSeekBarIfInvisible() {
@@ -727,21 +789,117 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
         }
     }
 
+    fun setFont(font: Int) {
+        var js = "const html = document.getElementsByTagName('html')[0];"
+        js += "html.classList.remove('" + HtmlUtil.getFont(0).replace(" ", "") + "');"
+        js += "html.classList.remove('" + HtmlUtil.getFont(1).replace(" ", "") + "');"
+        js += "html.classList.remove('" + HtmlUtil.getFont(2).replace(" ", "") + "');"
+        js += "html.classList.add('" + HtmlUtil.getFont(font) + "');"
+
+        mWebview!!.evaluateJavascript("(function(){$js})()") {}
+    }
+
+    fun setFontSize(size: Int) {
+        var js = "const html = document.getElementsByTagName('html')[0];"
+        if (size > 9) {
+            js += "html.classList.remove('" + HtmlUtil.getSize(size - 1).replace(" ", "") + "');"
+        }
+        if (size < 24) {
+            js += "html.classList.remove('" + HtmlUtil.getSize(size + 1).replace(" ", "") + "');"
+        }
+        js += "html.classList.add('" + HtmlUtil.getSize(size).replace(" ", "") + "');"
+
+        mWebview!!.evaluateJavascript("(function(){$js})()") {}
+    }
+
+    fun setFontLineSpace(size: Int) {
+        var js = "const html = document.getElementsByTagName('html')[0];"
+        if (size > 0) {
+            js += "html.classList.remove('" + HtmlUtil.getLineSpace(size - 10).replace(" ", "") + "');"
+        }
+        if (size < 200) {
+            js += "html.classList.remove('" + HtmlUtil.getLineSpace(size + 10).replace(" ", "") + "');"
+        }
+        js += "html.classList.add('" + HtmlUtil.getLineSpace(size).replace(" ", "") + "');"
+
+        mWebview!!.evaluateJavascript("(function(){$js})()") {}
+    }
+
+    fun setFontWhiteSpace(size: Int) {
+        var js = "const html = document.getElementsByTagName('html')[0];"
+        if (size > 0) {
+            js += "html.classList.remove('" + HtmlUtil.getWhiteSpace(size - 1).replace(" ", "") + "');"
+        }
+        if (size < 6) {
+            js += "html.classList.remove('" + HtmlUtil.getWhiteSpace(size + 1).replace(" ", "") + "');"
+        }
+        js += "html.classList.add('" + HtmlUtil.getWhiteSpace(size).replace(" ", "") + "');"
+
+        mWebview!!.evaluateJavascript("(function(){$js})()") {}
+    }
+
+    fun setAlignment(alignment: String) {
+        var js = "const html = document.getElementsByTagName('html')[0];"
+        if (alignment == "BOTH") {
+            js += "html.classList.remove('textAlignmentLeft');"
+            js += "html.classList.add('textAlignmentBoth');"
+        } else {
+            js += "html.classList.remove('textAlignmentBoth');"
+            js += "html.classList.add('textAlignmentLeft');"
+        }
+
+        mWebview!!.evaluateJavascript("(function(){$js})()") {}
+    }
+
+    fun setTheme(theme: String) {
+        var js = "const html = document.getElementsByTagName('html')[0];"
+        js += "html.classList.remove('" + HtmlUtil.getTheme("WHITE").replace(" ", "") + "');"
+        js += "html.classList.remove('" + HtmlUtil.getTheme("GRAY").replace(" ", "") + "');"
+        js += "html.classList.remove('" + HtmlUtil.getTheme("GREEN").replace(" ", "") + "');"
+        js += "html.classList.remove('" + HtmlUtil.getTheme("WOOD").replace(" ", "") + "');"
+        js += "html.classList.remove('" + HtmlUtil.getTheme("BLACK").replace(" ", "") + "');"
+        js += "html.classList.add('" + HtmlUtil.getTheme(theme).replace(" ", "") + "');"
+
+        mWebview!!.evaluateJavascript("(function(){$js})()") {}
+    }
+
+    fun getCurrentText() {
+        mWebview!!.evaluateJavascript("javascript:getBodyText('" + getLastReadLocator() + "')") { value ->
+            Log.e(LOG_TAG, "getCurrentText ->>> $value")
+        }
+    }
+
+    fun moveSeekbarPosition(pos: Int) {
+        mWebview!!.evaluateJavascript("javascript:setSeekbarPosition($pos)") {}
+    }
+
     @JavascriptInterface
+    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onReceiveBookmark(html: String?) {
         if (html != null) {
-//            rangy = BookmarkUtil.createBookmarkRangy(activity!!.applicationContext, html, mBookId, pageName, spineIndex, rangy)
-            Log.e(LOG_TAG, "mCurrentPage : $mCurrentPage")
-            rangy = BookmarkUtil.createBookmarkRangy(activity!!.applicationContext, html, mBookId, pageName, mCurrentPage!!, rangy)
+            val obj = JSONObject(html)
+            val content = obj.getString("content")
+
+            if (isCurrentFragment) {
+                mWebview!!.post {
+                    val readLocator = getLastReadLocator()
+
+                    var idx: Int = spineIndex-1
+                    if (idx < 0) idx = 0
+                    Log.e(LOG_TAG, "idx : $idx")
+
+                    BookmarkTable().insertBookmark(mBookId, content, idx, readLocator?.toJson().toString())
+                }
+            }
         }
     }
 
     @JavascriptInterface
     fun onReceiveHighlights(html: String?) {
         if (html != null) {
-//            rangy = HighlightUtil.createHighlightRangy(activity!!.applicationContext, html, mBookId, pageName, spineIndex, rangy)
-            Log.e(LOG_TAG, "mCurrentPage : $mCurrentPage")
-            rangy = HighlightUtil.createHighlightRangy(activity!!.applicationContext, html, mBookId, pageName, mCurrentPage!!, rangy)
+            var idx: Int = spineIndex-1
+            if (idx < 0) idx = 0
+            rangy = HighlightUtil.createHighlightRangy(activity!!.applicationContext, html, mBookId, pageName, idx, rangy)
         }
     }
 
@@ -782,6 +940,13 @@ class FolioPageFragment : Fragment(), HtmlTaskCallback, FolioWebView.SeekBarList
             loadingView!!.show()
             mWebview!!.loadUrl(String.format(getString(R.string.go_to_highlight), highlightId))
             this.highlightId = null
+        }
+    }
+
+    fun scrollToCFI(cfi: String) {
+        if (loadingView != null && loadingView!!.visibility != View.VISIBLE) {
+            loadingView!!.show()
+            mWebview!!.loadUrl(String.format(getString(R.string.callScrollToCfi), cfi))
         }
     }
 

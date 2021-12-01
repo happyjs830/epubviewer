@@ -12,7 +12,7 @@
         android:id="@+id/btn_more"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_more"
+        android:background="@drawable/ic_more_gr"
         android:visibility="gone"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16.5dp"
@@ -20,20 +20,34 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/textViewChapter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textSize="14dp"
+        android:textColor="#697383"
+        android:includeFontPadding="false"
+        android:layout_marginStart="16.06dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="챕터명" />
+
+    <TextView
         android:id="@+id/textViewContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxLines="3"
+        android:maxLines="1"
         android:layout_marginStart="16.5dp"
-        android:layout_marginEnd="37.5dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginEnd="25.56dp"
+        android:layout_marginTop="8dp"
         android:textSize="13dp"
         android:textColor="@color/layout_search_result_title_color"
         android:gravity="start"
         android:ellipsize="end"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textViewChapter"
         tools:text="하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기하이라이트 내용 한 문장 추가하기" />
 
     <TextView
@@ -75,32 +89,6 @@
         app:layout_constraintStart_toEndOf="@id/devide1"
         app:layout_constraintBottom_toTopOf="@id/line_bottom"
         tools:text="71페이지" />
-
-    <View
-        android:id="@+id/devide2"
-        android:layout_width="1dp"
-        android:layout_height="10dp"
-        android:layout_gravity="center"
-        android:background="#97A7BC"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="12.5dp"
-        android:layout_marginBottom="18dp"
-        app:layout_constraintStart_toEndOf="@id/textViewPage"
-        app:layout_constraintBottom_toTopOf="@id/line_bottom"/>
-
-    <TextView
-        android:id="@+id/textViewChapter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:textSize="12dp"
-        android:textColor="#97A7BC"
-        android:includeFontPadding="false"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintStart_toEndOf="@id/devide2"
-        app:layout_constraintBottom_toTopOf="@id/line_bottom"
-        tools:text="챕터명" />
 
     <View
         android:id="@+id/line_bottom"

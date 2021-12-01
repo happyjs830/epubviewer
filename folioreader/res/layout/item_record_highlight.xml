@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="114dp"
+    android:layout_height="wrap_content"
     android:background="@color/white"
     android:id="@+id/item_highlight">
 
@@ -12,7 +12,7 @@
         android:id="@+id/btn_more"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_more"
+        android:background="@drawable/ic_more_gr"
         android:visibility="gone"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16.5dp"
@@ -23,7 +23,6 @@
         android:id="@+id/textViewContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxLines="3"
         android:layout_marginStart="16.5dp"
         android:layout_marginEnd="37.5dp"
         android:layout_marginTop="16dp"
@@ -43,10 +42,12 @@
         android:maxLines="1"
         android:layout_marginStart="16.5dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginTop="8dp"
         android:textSize="12dp"
         android:textColor="#97A7BC"
         android:includeFontPadding="false"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textViewContent"
         app:layout_constraintBottom_toTopOf="@id/line_bottom"
         tools:text="YYYY-MM-DD" />
 
@@ -57,9 +58,10 @@
         android:layout_gravity="center"
         android:background="#97A7BC"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="12.5dp"
+        android:layout_marginTop="9dp"
         android:layout_marginBottom="18dp"
         app:layout_constraintStart_toEndOf="@id/textViewDate"
+        app:layout_constraintTop_toBottomOf="@id/textViewContent"
         app:layout_constraintBottom_toTopOf="@id/line_bottom"/>
 
     <TextView
@@ -72,8 +74,10 @@
         android:includeFontPadding="false"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toEndOf="@id/devide1"
         app:layout_constraintBottom_toTopOf="@id/line_bottom"
+        app:layout_constraintTop_toBottomOf="@id/textViewContent"
         tools:text="71페이지" />
 
     <View
@@ -83,9 +87,10 @@
         android:layout_gravity="center"
         android:background="#97A7BC"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="12.5dp"
+        android:layout_marginTop="9dp"
         android:layout_marginBottom="18dp"
         app:layout_constraintStart_toEndOf="@id/textViewPage"
+        app:layout_constraintTop_toBottomOf="@id/textViewContent"
         app:layout_constraintBottom_toTopOf="@id/line_bottom"/>
 
     <TextView
@@ -98,8 +103,10 @@
         android:includeFontPadding="false"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toEndOf="@id/devide2"
         app:layout_constraintBottom_toTopOf="@id/line_bottom"
+        app:layout_constraintTop_toBottomOf="@id/textViewContent"
         tools:text="챕터명" />
 
     <View

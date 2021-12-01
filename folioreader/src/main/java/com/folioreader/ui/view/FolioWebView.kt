@@ -2,12 +2,10 @@ package com.folioreader.ui.view
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -20,12 +18,10 @@ import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.PopupWindow
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import com.folioreader.Config
-import com.folioreader.Constants
 import com.folioreader.R
 import com.folioreader.model.DisplayUnit
 import com.folioreader.model.HighLight
@@ -33,7 +29,6 @@ import com.folioreader.model.HighlightImpl.HighlightStyle
 import com.folioreader.model.sqlite.HighLightTable
 import com.folioreader.ui.activity.FolioActivity
 import com.folioreader.ui.activity.FolioActivityCallback
-import com.folioreader.ui.fragment.DictionaryFragment
 import com.folioreader.ui.fragment.FolioPageFragment
 import com.folioreader.util.AppUtil
 import com.folioreader.util.HighlightUtil
@@ -258,9 +253,9 @@ class FolioWebView : WebView {
         }
 
         viewTextSelection.bookmark.setOnClickListener {
+            Log.e(LOG_TAG, " bookmark setOnClickListener ")
             dismissPopupWindow()
             onBookmarkItemsClicked()
-//            loadUrl("javascript:onTextSelectionItemClicked(${it.id})")
         }
 
         viewTextSelection.memo.setOnClickListener {
@@ -329,6 +324,7 @@ class FolioWebView : WebView {
     }
 
     private fun onBookmarkItemsClicked() {
+        Log.e(LOG_TAG, " onBookmarkItemsClicked ")
         parentFragment.bookmark()
         dismissPopupWindow()
     }

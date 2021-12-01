@@ -13,6 +13,7 @@
         android:id="@+id/folioPageViewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/black"
         app:direction="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -101,6 +102,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <include
+        android:id="@+id/ll_bottom_seekbar"
+        layout="@layout/layout_bottom_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/ll_bottom_bar"/>
 
     <include
         android:id="@+id/ll_left_layer"

@@ -65,7 +65,34 @@ function getHighlightContent() {
 }
 
 function getBodyText() {
-    return document.body.innerText;
+    const totalHeight = document.body.scrollHeight;
+    const currentPosY = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop;
+    const screenHeight = window.innerHeight;
+
+    console.log("total height : " + totalHeight + ", currentHeight : " + currentPosY);
+    console.log("total page : " + Math.ceil(totalHeight / screenHeight));
+    console.log("current page : " + (Math.ceil(currentPosY / screenHeight)+1));
+
+    return {
+        currentPage: (Math.ceil(currentPosY / screenHeight)+1),
+
+
+//        var $obj = EPUBcfi.Interpreter.getRangeTargetElements(rangeCfi, document);
+//        console.log("-> $obj = " + $obj);
+//
+//        var range = document.createRange();
+//        range.setStart($obj.startElement, $obj.startOffset);
+//        range.setEnd($obj.endElement, $obj.endOffset);
+//
+//        console.log("-> range = " + range);
+    };
+}
+
+function setSeekbarPosition(pos) {
+    console.log("gogo !! " + pos);
+
+    const screenHeight = window.innerHeight;
+    window.scrollTo(0, screenHeight * pos)
 }
 
 // Method that gets the Rect of current selected text
@@ -252,22 +279,6 @@ $(function () {
 
         },
 
-        setFontAndada: function () {
-            this.setFont("andada");
-        },
-
-        setFontLato: function () {
-            this.setFont("lato");
-        },
-
-        setFontPtSerif: function () {
-            this.setFont("pt-serif");
-        },
-
-        setFontPtSans: function () {
-            this.setFont("pt-sans");
-        },
-
         base64encode: function (str) {
             return btoa(unescape(encodeURIComponent(str)));
         },
@@ -310,7 +321,7 @@ $(function () {
         bookmark: function () {
             try {
                 var range = window.getSelection().toString();
-                var params = {content: range, rangy: this.getHighlights()};
+                var params = {content: range};
                 this.clearSelection();
                 Highlight.onReceiveBookmark(JSON.stringify(params));
             } catch (err) {
@@ -320,7 +331,6 @@ $(function () {
 
         highlightSelection: function (color) {
             try {
-
                 this.highlighter.highlightSelection(color, null);
                 var range = window.getSelection().toString();
                 var params = {content: range, rangy: this.getHighlights(), color: color};

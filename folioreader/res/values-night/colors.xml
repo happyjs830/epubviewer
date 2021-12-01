@@ -68,6 +68,7 @@
     <color name="layout_setting_minus_button_border">#404551</color>
     <color name="layout_setting_plus_button_border">#404551</color>
     <color name="layout_setting_seekbar_background">#404551</color>
+    <color name="layout_setting_bottom_handle_color">#404551</color>
     <color name="setting_theme_white_selected_border">#ACC231</color>
     <color name="setting_theme_white_normal_border">#404551</color>
     <color name="setting_theme_gray_selected_border">#ACC231</color>

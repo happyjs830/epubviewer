@@ -145,6 +145,11 @@
     <style name="MainBottomMenuStyle">
         <item name="android:layout_width">60dp</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:drawablePadding">5.89dp</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:layout_marginBottom">14dp</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:textSize">11dp</item>
         <item name="android:textColor">@drawable/custom_bottom_button_color</item>
@@ -155,6 +160,8 @@
     <style name="MainBottomDirectionStyle">
         <item name="android:layout_width">50dp</item>
         <item name="android:layout_height">22dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:textSize">12dp</item>
         <item name="android:textColor">@color/layout_bottom_button_direction_color</item>

@@ -9,14 +9,15 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.folioreader.R;
+import com.folioreader.ThemeConfig;
 import com.folioreader.ui.adapter.AdapterRecyclerViewItemBook;
-import com.folioreader.ui.adapter.AdapterRecyclerViewItemIndex;
 
 import org.readium.r2.shared.Publication;
 
@@ -26,7 +27,7 @@ public class FragmentChapterListBook extends Fragment {
 
     private ViewGroup mView = null;
     private final Publication mPublication;
-    private FragmentActivity mActivity;
+    private final FragmentActivity mActivity;
 
     public FragmentChapterListBook(Publication publication, FragmentActivity activity, String bookId) {
         mPublication = publication;
@@ -56,6 +57,9 @@ public class FragmentChapterListBook extends Fragment {
 
     private void init() {
         // RecyclerView //
+        ConstraintLayout cl = mView.findViewById(R.id.item_list);
+        cl.setBackgroundColor(ThemeConfig._baseBackgroundColor);
+
         RecyclerView mRecyclerView = mView.findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 

@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_bottom_bar"
     android:background="@color/layout_bottom_background"
     android:layout_width="match_parent"
     android:layout_height="66dp"
@@ -10,47 +11,43 @@
 
     <Button
         android:id="@+id/btn_list"
-        android:drawableTop="@drawable/custom_button_list"
+        android:drawableTop="@drawable/ic_nav_list_gr"
         android:text="@string/menu_item_list"
         style="@style/MainBottomMenuStyle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <Button
         android:id="@+id/btn_record"
-        android:drawableTop="@drawable/custom_button_record"
+        android:drawableTop="@drawable/ic_nav_book_gr"
         android:text="@string/menu_item_record"
         style="@style/MainBottomMenuStyle"
         app:layout_constraintStart_toEndOf="@id/btn_list"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <Button
         android:id="@+id/btn_comment"
-        android:drawableTop="@drawable/custom_button_comment"
+        android:drawableTop="@drawable/ic_nav_comment_gr"
         android:text="@string/menu_item_comment"
         style="@style/MainBottomMenuStyle"
         app:layout_constraintStart_toEndOf="@id/btn_record"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <Button
         android:id="@+id/btn_review"
-        android:drawableTop="@drawable/custom_button_review"
+        android:drawableTop="@drawable/ic_nav_review_gr"
         android:text="@string/menu_item_review"
         style="@style/MainBottomMenuStyle"
         app:layout_constraintStart_toEndOf="@id/btn_comment"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <Button
         android:id="@+id/btn_next_book"
-        android:drawableEnd="@drawable/ic_arrow_line_right"
+        android:drawableEnd="@drawable/ic_arrow_line_right_gr"
         android:text="@string/menu_item_next"
         style="@style/MainBottomDirectionStyle"
         android:layout_marginEnd="16dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginBottom="22dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -66,12 +63,12 @@
 
     <Button
         android:id="@+id/btn_prev_book"
-        android:drawableStart="@drawable/ic_arrow_line_left"
+        android:drawableStart="@drawable/ic_arrow_line_left_gr"
         android:text="@string/menu_item_prev"
         style="@style/MainBottomDirectionStyle"
         android:layout_marginEnd="8.5dp"
+        android:layout_marginBottom="22dp"
         app:layout_constraintEnd_toStartOf="@id/devideLine"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

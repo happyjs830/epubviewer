@@ -28,20 +28,26 @@ public class HighlightUtil {
             String textContent = jObject.getString("content");
             String color = jObject.getString("color");
 
+            // 저장될 하이라이트 텍스트 1,000자 체크 //
+            String result = "";
+            if (textContent.length() >= 1000) {
+                result = textContent.substring(0, 1000);
+            } else {
+                result = textContent;
+            }
+            Log.e(TAG, "result => " + result);
+
             String rangyHighlightElement = getRangyString(rangy, oldRangy);
-            Log.e(TAG, "rangyHighlightElement => " + rangyHighlightElement);
 
             HighlightImpl highlightImpl = new HighlightImpl();
-            highlightImpl.setContent(textContent);
+            highlightImpl.setContent(result);
             highlightImpl.setType(color);
             highlightImpl.setPageNumber(pageNo);
             highlightImpl.setBookId(bookId);
             highlightImpl.setPageId(pageId);
             highlightImpl.setRangy(rangyHighlightElement);
             highlightImpl.setDate(Calendar.getInstance().getTime());
-
-            long ts = System.currentTimeMillis() / 1000;
-            highlightImpl.setTimeStamp(ts);
+            highlightImpl.setTimeStamp(System.currentTimeMillis() / 1000);
 
             // save highlight to database
             long id = HighLightTable.insertHighlight(highlightImpl);
@@ -68,7 +74,6 @@ public class HighlightUtil {
         for (String firs : getRangyArray(oldRangy)) {
             rangyList.remove(firs);
         }
-        Log.e(TAG, "size : " + rangyList.size());
         if (rangyList.size() >= 1) {
             return rangyList.get(0);
         } else {

@@ -28,9 +28,9 @@ public class Config implements Parcelable {
     public static final String CONFIG_IS_ALIGNMENT = "is_alignment";
     public static final String CONFIG_IS_PAGE = "is_page";
     public static final String CONFIG_IS_THEME = "is_theme";
+    public static final String CONFIG_SCREEN_FILTER = "screen_filter";
     public static final String CONFIG_IS_NIGHT_MODE = "is_night_mode";
     public static final String CONFIG_THEME_COLOR_INT = "theme_color_int";
-    public static final String CONFIG_IS_TTS = "is_tts";
     public static final String CONFIG_ALLOWED_DIRECTION = "allowed_direction";
     public static final String CONFIG_DIRECTION = "direction";
     private static final AllowedDirection DEFAULT_ALLOWED_DIRECTION = AllowedDirection.ONLY_VERTICAL;
@@ -45,11 +45,11 @@ public class Config implements Parcelable {
     private String alignment;
     private String page;
     private String theme;
+    private int screenFilter;
     private boolean nightMode;
 
     @ColorInt
     private int themeColor = DEFAULT_THEME_COLOR_INT;
-    private boolean showTts = true;
     private AllowedDirection allowedDirection = DEFAULT_ALLOWED_DIRECTION;
     private Direction direction = DEFAULT_DIRECTION;
 
@@ -93,9 +93,9 @@ public class Config implements Parcelable {
         dest.writeString(alignment);
         dest.writeString(page);
         dest.writeString(theme);
+        dest.writeInt(screenFilter);
         dest.writeByte((byte) (nightMode ? 1 : 0));
         dest.writeInt(themeColor);
-        dest.writeByte((byte) (showTts ? 1 : 0));
         dest.writeString(allowedDirection.toString());
         dest.writeString(direction.toString());
     }
@@ -108,21 +108,22 @@ public class Config implements Parcelable {
         alignment = in.readString();
         page = in.readString();
         theme = in.readString();
+        screenFilter = in.readInt();
         nightMode = in.readByte() != 0;
         themeColor = in.readInt();
-        showTts = in.readByte() != 0;
         allowedDirection = getAllowedDirectionFromString(LOG_TAG, Objects.requireNonNull(in.readString()));
         direction = getDirectionFromString(LOG_TAG, Objects.requireNonNull(in.readString()));
     }
 
     public Config() {
-        font = 5;
+        font = 0;
         fontSize = 12;
         fontLineSpace = 100;
         fontWhiteSpace = 0;
         alignment = "LEFT";
         page = "TB";
         theme = "WHITE";
+        screenFilter = 0;
     }
 
     public Config(JSONObject jsonObject) {
@@ -133,9 +134,9 @@ public class Config implements Parcelable {
         alignment = jsonObject.optString(CONFIG_IS_ALIGNMENT);
         page = jsonObject.optString(CONFIG_IS_PAGE);
         theme = jsonObject.optString(CONFIG_IS_THEME);
+        screenFilter = jsonObject.optInt(CONFIG_SCREEN_FILTER);
         nightMode = jsonObject.optBoolean(CONFIG_IS_NIGHT_MODE);
         themeColor = getValidColorInt(jsonObject.optInt(CONFIG_THEME_COLOR_INT));
-        showTts = jsonObject.optBoolean(CONFIG_IS_TTS);
         allowedDirection = getAllowedDirectionFromString(LOG_TAG,
                 jsonObject.optString(CONFIG_ALLOWED_DIRECTION));
         direction = getDirectionFromString(LOG_TAG, jsonObject.optString(CONFIG_DIRECTION));
@@ -223,17 +224,15 @@ public class Config implements Parcelable {
         return this;
     }
 
-    public boolean isNightMode() {
-        return nightMode;
+    public int getScreenFilter() { return screenFilter; }
+
+    public Config setScreenFilter(int filter) {
+        this.screenFilter = filter;
+        return this;
     }
 
-    public Config setNightMode() {
-        if (getCurrentTheme().equals("GREEN") || getCurrentTheme().equals("WOOD") || getCurrentTheme().equals("BLACK")) {
-            this.nightMode = true;
-        } else {
-            this.nightMode = false;
-        }
-        return this;
+    public boolean isNightMode() {
+        return nightMode;
     }
 
     @ColorInt
@@ -249,10 +248,6 @@ public class Config implements Parcelable {
     @ColorInt
     public int getThemeColor() {
         return themeColor;
-    }
-
-    public boolean isShowTts() {
-        return showTts;
     }
 
     public AllowedDirection getAllowedDirection() {
@@ -341,9 +336,9 @@ public class Config implements Parcelable {
                 ", alignment=" + alignment +
                 ", page=" + page +
                 ", theme=" + theme +
+                ", screenFIlter=" + screenFilter +
                 ", nightMode=" + nightMode +
                 ", themeColor=" + themeColor +
-                ", showTts=" + showTts +
                 ", allowedDirection=" + allowedDirection +
                 ", direction=" + direction +
                 '}';

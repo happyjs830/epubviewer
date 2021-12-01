@@ -91,7 +91,6 @@
             android:layout_width="match_parent"
             android:layout_height="6dp"
             android:background="@color/layout_search_result_top_line_color"
-            android:visibility="gone"
             android:layout_gravity="bottom"/>
 
     </LinearLayout>

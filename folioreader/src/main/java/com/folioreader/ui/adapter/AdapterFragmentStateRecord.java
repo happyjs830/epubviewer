@@ -14,14 +14,18 @@ import com.folioreader.ui.fragment.FragmentRecordBookmark;
 import com.folioreader.ui.fragment.FragmentRecordHighlight;
 import com.folioreader.ui.fragment.FragmentRecordMemo;
 
+import org.readium.r2.shared.Publication;
+
 public class AdapterFragmentStateRecord extends FragmentStateAdapter {
     private final Bundle mBundle;
     private final RecordFragment mParent;
+    private final Publication mPublication;
 
-    public AdapterFragmentStateRecord(@NonNull FragmentActivity fragmentActivity, Bundle bundle, RecordFragment parent) {
+    public AdapterFragmentStateRecord(@NonNull FragmentActivity fragmentActivity, Bundle bundle, RecordFragment parent, Publication publication) {
         super(fragmentActivity);
         mBundle = bundle;
         mParent = parent;
+        mPublication = publication;
     }
 
     @Override
@@ -32,14 +36,13 @@ public class AdapterFragmentStateRecord extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
+        String bookId = (mBundle != null) ?  mBundle.getString(FolioReader.EXTRA_BOOK_ID) : "";
+        String bookTitle = (mBundle != null) ? mBundle.getString(Constants.BOOK_TITLE) : "";
+
         if (position == 0) {
-            String bookId = (mBundle != null) ?  mBundle.getString(FolioReader.EXTRA_BOOK_ID) : "";
-            String bookTitle = (mBundle != null) ? mBundle.getString(Constants.BOOK_TITLE) : "";
-            return new FragmentRecordBookmark(bookId, bookTitle, mParent);
+            return new FragmentRecordBookmark(bookId, bookTitle, mParent, mPublication);
         } else if (position == 1) {
-            String bookId = (mBundle != null) ?  mBundle.getString(FolioReader.EXTRA_BOOK_ID) : "";
-            String bookTitle = (mBundle != null) ? mBundle.getString(Constants.BOOK_TITLE) : "";
-            return new FragmentRecordHighlight(bookId, bookTitle, mParent);
+            return new FragmentRecordHighlight(bookId, bookTitle, mParent, mPublication);
         } else {
             return new FragmentRecordMemo();
         }

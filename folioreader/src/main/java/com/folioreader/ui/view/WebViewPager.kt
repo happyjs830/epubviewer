@@ -42,7 +42,7 @@ class WebViewPager : ViewPager {
         uiHandler = Handler()
         gestureDetector = GestureDetectorCompat(context, GestureListener())
 
-        addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+        addOnPageChangeListener(object : OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
                 // Log.d(LOG_TAG, "-> onPageScrolled -> position = " + position +
                 // ", positionOffset = " + positionOffset + ", positionOffsetPixels = " + positionOffsetPixels);
@@ -63,7 +63,7 @@ class WebViewPager : ViewPager {
             }
 
             override fun onPageSelected(position: Int) {
-                Log.v(LOG_TAG, "-> onPageSelected -> $position")
+                Log.e(LOG_TAG, "-> onPageSelected -> $position")
             }
 
             override fun onPageScrollStateChanged(state: Int) {}

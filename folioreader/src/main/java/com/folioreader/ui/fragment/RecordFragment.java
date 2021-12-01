@@ -29,16 +29,11 @@ import com.folioreader.FolioReader;
 import com.folioreader.R;
 import com.folioreader.ui.activity.FolioActivity;
 import com.folioreader.ui.adapter.AdapterFragmentStateRecord;
-import com.folioreader.util.UiUtil;
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.readium.r2.shared.Contributor;
 import org.readium.r2.shared.Publication;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public class RecordFragment extends Fragment {
@@ -62,7 +57,7 @@ public class RecordFragment extends Fragment {
     private ImageView iv_book_bg = null;
     private ImageView iv_book_img = null;
 
-    private int mCurrentViewPager = -1;
+    private int mCurrentViewPager = 0;
 
     public interface RecordBookmarkListener {
         void onClickBack();
@@ -120,18 +115,22 @@ public class RecordFragment extends Fragment {
             @Override
             public void handleOnBackPressed() {
                 if (mEditTopBar.getVisibility() == View.VISIBLE) {
-                    if (mBookmarkListener != null) {
-                        mBookmarkListener.onClickBack();
+                    if (mCurrentViewPager == 0) {
+                        if (mBookmarkListener != null) {
+                            Log.e(LOG_TAG, "mBookmarkListener");
+                            mBookmarkListener.onClickBack();
+                        }
+                    } else if (mCurrentViewPager == 1) {
+                        if (mHighlightListener != null) {
+                            Log.e(LOG_TAG, "mHighlightListener");
+                            mHighlightListener.onClickBack();
+                        }
+                    } else {
+                        if (mMemoListener != null) {
+                            Log.e(LOG_TAG, "mMemoListener");
+                            mMemoListener.onClickBack();
+                        }
                     }
-
-                    if (mHighlightListener != null) {
-                        mHighlightListener.onClickBack();
-                    }
-
-                    if (mMemoListener != null) {
-                        mMemoListener.onClickBack();
-                    }
-
                     setEditMode(false);
                 } else {
                     close();
@@ -178,18 +177,16 @@ public class RecordFragment extends Fragment {
         mView.findViewById(R.id.btn_edit_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCurrentViewPager == 0) {
-                    if (mBookmarkListener != null) {
-                        mBookmarkListener.onClickBack();
-                    }
-                } else if (mCurrentViewPager == 1) {
-                    if (mHighlightListener != null) {
-                        mHighlightListener.onClickBack();
-                    }
-                } else {
-                    if (mMemoListener != null) {
-                        mMemoListener.onClickBack();
-                    }
+                if (mBookmarkListener != null) {
+                    mBookmarkListener.onClickBack();
+                }
+
+                if (mHighlightListener != null) {
+                    mHighlightListener.onClickBack();
+                }
+
+                if (mMemoListener != null) {
+                    mMemoListener.onClickBack();
                 }
                 setEditMode(false);
             }
@@ -237,13 +234,10 @@ public class RecordFragment extends Fragment {
     }
 
     private void initBotom() {
-        Log.e(LOG_TAG, "-> initBotom");
-
         Bundle bundle = new Bundle();
         if (getArguments() != null) {
             String bookID = getArguments().getString(FolioReader.EXTRA_BOOK_ID);
             String bookTitle = getArguments().getString(Constants.BOOK_TITLE);
-            Log.e(LOG_TAG, "bookID : " + bookID + ", bookTitle : " + bookTitle);
 
             bundle.putString(FolioReader.EXTRA_BOOK_ID, bookID);
             bundle.putString(Constants.BOOK_TITLE, bookTitle);
@@ -252,7 +246,7 @@ public class RecordFragment extends Fragment {
         // ViewPager //
         viewPager = mView.findViewById(R.id.viewPager);
         viewPager.setUserInputEnabled(false);
-        FragmentStateAdapter adapter = new AdapterFragmentStateRecord(Objects.requireNonNull(getActivity()), bundle, this);
+        FragmentStateAdapter adapter = new AdapterFragmentStateRecord(Objects.requireNonNull(getActivity()), bundle, this, mPublication);
         viewPager.setAdapter(adapter);
 
         // TabLayout //
@@ -260,23 +254,21 @@ public class RecordFragment extends Fragment {
         tl_record.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                mCurrentViewPager = tab.getPosition();
-
-                if (mEditTopBar.getVisibility() == View.VISIBLE) {
-                    if (tab.getPosition() == 0) {
-                        if (mBookmarkListener != null) {
-                            mBookmarkListener.onClickBack();
-                        }
-                    } else if (tab.getPosition() == 1) {
-                        if (mHighlightListener != null) {
-                            mHighlightListener.onClickBack();
-                        }
-                    } else {
-                        if (mMemoListener != null) {
-                            mMemoListener.onClickBack();
-                        }
+                if (mCurrentViewPager == 0) {
+                    if (mBookmarkListener != null) {
+                        mBookmarkListener.onClickBack();
+                    }
+                } else if (mCurrentViewPager == 1) {
+                    if (mHighlightListener != null) {
+                        mHighlightListener.onClickBack();
+                    }
+                } else {
+                    if (mMemoListener != null) {
+                        mMemoListener.onClickBack();
                     }
                 }
+
+                mCurrentViewPager = tab.getPosition();
                 setEditMode(false);
 
                 viewPager.setCurrentItem(tab.getPosition());
@@ -299,7 +291,6 @@ public class RecordFragment extends Fragment {
     }
 
     public void setEditMode(boolean mode) {
-        Log.e(LOG_TAG, "mode : " + mode);
         mEditTopBar.setVisibility(mode ? View.VISIBLE : View.GONE);
         mEditTopBar.setClickable(true);
     }
@@ -332,7 +323,6 @@ public class RecordFragment extends Fragment {
     public void setIntentToFolioActivity(Intent intent) {
         close();
 
-        Log.e(LOG_TAG, " RECORD_TYPE : " + intent.getStringExtra("RECORD_TYPE"));
         if (intent.getStringExtra("RECORD_TYPE").equals("BOOKMARK")) {
             ((FolioActivity) Objects.requireNonNull(getActivity())).setBookmarkPage(intent);
         } else {

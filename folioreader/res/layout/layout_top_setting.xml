@@ -28,6 +28,7 @@
             android:layout_alignParentEnd="true">
 
             <TextView
+                android:id="@+id/txtSettingFontStyle"
                 style="@style/MenuSettingTitleTextViewStyle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true"
@@ -37,6 +38,7 @@
 
             <Spinner
                 android:id="@+id/spinner_font"
+                android:background="@drawable/custom_spinner_layout_light"
                 android:layout_width="244dp"
                 android:layout_height="34dp"
                 android:layout_alignParentTop="true"
@@ -56,6 +58,7 @@
             android:layout_alignParentEnd="true">
 
             <TextView
+                android:id="@+id/txtSettingFontSize"
                 style="@style/MenuSettingTitleTextViewStyle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true"
@@ -76,8 +79,8 @@
                     android:id="@+id/btnFontSizeMinus"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:background="@drawable/custom_button_round_square"
-                    android:src="@drawable/ic_minus"
+                    android:background="@drawable/custom_button_round_square_light"
+                    android:src="@drawable/ic_minus_gr"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"
@@ -87,17 +90,17 @@
                     android:id="@+id/tvFontSizeMinus"
                     android:layout_width="wrap_content"
                     android:layout_height="19dp"
-                    android:minHeight="0dp"
-                    android:minWidth="0dp"
-                    android:text="15pt"
-                    android:textSize="13dp"
-                    android:background="@android:color/transparent"
                     android:layout_centerVertical="true"
-                    android:layout_toEndOf="@id/btnFontSizeMinus"
-                    android:layout_toStartOf="@id/tvFontSizeCenter"
                     android:layout_marginStart="25dp"
                     android:layout_marginEnd="25dp"
-                    android:textColor="@color/layout_setting_value_text_color"/>
+                    android:layout_toStartOf="@id/tvFontSizeCenter"
+                    android:layout_toEndOf="@id/btnFontSizeMinus"
+                    android:background="@android:color/transparent"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:text="15pt"
+                    android:textColor="@color/layout_setting_value_text_color"
+                    android:textSize="13dp" />
 
                 <TextView
                     android:id="@+id/tvFontSizeCenter"
@@ -133,8 +136,8 @@
                     android:id="@+id/btnFontSizePlus"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:background="@drawable/custom_button_round_square"
-                    android:src="@drawable/ic_plus"
+                    android:background="@drawable/custom_button_round_square_light"
+                    android:src="@drawable/ic_plus_gr"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"
@@ -152,6 +155,7 @@
             android:layout_alignParentEnd="true">
 
             <TextView
+                android:id="@+id/txtSettingFontLineSpace"
                 style="@style/MenuSettingTitleTextViewStyle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true"
@@ -172,8 +176,8 @@
                     android:id="@+id/btnFontLineSpaceMinus"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:background="@drawable/custom_button_round_square"
-                    android:src="@drawable/ic_minus"
+                    android:background="@drawable/custom_button_round_square_light"
+                    android:src="@drawable/ic_minus_gr"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"
@@ -228,8 +232,8 @@
                     android:id="@+id/btnFontLineSpacePlus"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:background="@drawable/custom_button_round_square"
-                    android:src="@drawable/ic_plus"
+                    android:background="@drawable/custom_button_round_square_light"
+                    android:src="@drawable/ic_plus_gr"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"
@@ -247,6 +251,7 @@
             android:layout_alignParentEnd="true">
 
             <TextView
+                android:id="@+id/txtSettingFontWhiteSpace"
                 style="@style/MenuSettingTitleTextViewStyle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true"
@@ -267,8 +272,8 @@
                     android:id="@+id/btnFontWhiteSpaceMinus"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:background="@drawable/custom_button_round_square"
-                    android:src="@drawable/ic_minus"
+                    android:background="@drawable/custom_button_round_square_light"
+                    android:src="@drawable/ic_minus_gr"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"
@@ -324,8 +329,8 @@
                     android:id="@+id/btnFontWhiteSpacePlus"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:background="@drawable/custom_button_round_square"
-                    android:src="@drawable/ic_plus"
+                    android:background="@drawable/custom_button_round_square_light"
+                    android:src="@drawable/ic_plus_gr"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"
@@ -343,6 +348,7 @@
             android:layout_alignParentEnd="true">
 
             <TextView
+                android:id="@+id/txtSettingAlignment"
                 style="@style/MenuSettingTitleTextViewStyle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true"
@@ -365,7 +371,7 @@
                     android:layout_height="19dp"
                     android:minHeight="0dp"
                     android:minWidth="0dp"
-                    android:drawableStart="@drawable/custom_icon_alignment_left"
+                    android:drawableStart="@drawable/ic_paragraph_left_gr"
                     android:text="@string/layout_setting_alignment_left"
                     android:textSize="14dp"
                     android:background="@android:color/transparent"
@@ -381,7 +387,7 @@
                     android:layout_height="19dp"
                     android:minHeight="0dp"
                     android:minWidth="0dp"
-                    android:drawableStart="@drawable/custom_icon_alignment_both"
+                    android:drawableStart="@drawable/ic_paragraph_justify_gr"
                     android:text="@string/layout_setting_alignment_both"
                     android:textSize="14dp"
                     android:background="@android:color/transparent"
@@ -416,6 +422,7 @@
             android:layout_alignParentEnd="true">
 
             <TextView
+                android:id="@+id/txtSettingPage"
                 style="@style/MenuSettingTitleTextViewStyle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true"
@@ -438,7 +445,7 @@
                     android:layout_height="20dp"
                     android:minHeight="0dp"
                     android:minWidth="0dp"
-                    android:drawableStart="@drawable/custom_icon_page_tb"
+                    android:drawableStart="@drawable/ic_page_vertical_gr"
                     android:text="@string/layout_setting_page_tb"
                     android:textSize="14dp"
                     android:background="@android:color/transparent"
@@ -454,7 +461,7 @@
                     android:layout_height="20dp"
                     android:minHeight="0dp"
                     android:minWidth="0dp"
-                    android:drawableStart="@drawable/custom_icon_page_lr"
+                    android:drawableStart="@drawable/ic_page_horizontal_gr"
                     android:text="@string/layout_setting_page_lr"
                     android:textSize="14dp"
                     android:background="@android:color/transparent"
@@ -471,7 +478,7 @@
                     android:layout_height="20dp"
                     android:minHeight="0dp"
                     android:minWidth="0dp"
-                    android:drawableStart="@drawable/custom_icon_page_scroll"
+                    android:drawableStart="@drawable/ic_page_scroll_gr"
                     android:text="@string/layout_setting_page_scroll"
                     android:textSize="14dp"
                     android:background="@android:color/transparent"
@@ -526,6 +533,7 @@
             android:layout_alignParentEnd="true">
 
             <TextView
+                android:id="@+id/txtSettingTheme"
                 style="@style/MenuSettingTitleTextViewStyle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true"
@@ -544,7 +552,7 @@
                 <ImageView
                     android:id="@+id/btnThemeWhite"
                     style="@style/MenuSettingThemeImageViewStyle"
-                    android:src="@drawable/custom_selector_theme_white"
+                    android:background="@color/white"
                     tools:ignore="ContentDescription" />
 
                 <TextView
@@ -560,7 +568,7 @@
                     style="@style/MenuSettingThemeImageViewStyle"
                     android:layout_toEndOf="@id/btnThemeWhite"
                     android:layout_marginStart="16dp"
-                    android:src="@drawable/custom_selector_theme_gray"
+                    android:background="#EAEDF0"
                     tools:ignore="ContentDescription" />
 
                 <TextView
@@ -576,7 +584,7 @@
                     style="@style/MenuSettingThemeImageViewStyle"
                     android:layout_toEndOf="@id/btnThemeGray"
                     android:layout_marginStart="16dp"
-                    android:src="@drawable/custom_selector_theme_green"
+                    android:background="#D4EFC1"
                     tools:ignore="ContentDescription" />
 
                 <TextView
@@ -592,7 +600,7 @@
                     style="@style/MenuSettingThemeImageViewStyle"
                     android:layout_toEndOf="@id/btnThemeGreen"
                     android:layout_marginStart="16dp"
-                    android:src="@drawable/custom_selector_theme_wood"
+                    android:background="#192C17"
                     tools:ignore="ContentDescription" />
 
                 <TextView
@@ -608,7 +616,7 @@
                     style="@style/MenuSettingThemeImageViewStyle"
                     android:layout_toEndOf="@id/btnThemeWood"
                     android:layout_marginStart="16dp"
-                    android:src="@drawable/custom_selector_theme_black"
+                    android:background="#22242A"
                     tools:ignore="ContentDescription" />
 
                 <TextView
@@ -640,11 +648,12 @@
                 android:text="@string/layout_setting_brightness" />
 
             <TextView
+                android:id="@+id/txtBrightnessGuide"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/layout_setting_night_mode"
                 android:textSize="9dp"
-                android:textColor="@color/layout_setting_brightness_comment_color"
+                android:textColor="#97A7BC"
                 android:layout_below="@id/txtBrightness"
                 android:layout_alignParentStart="true"
                 android:layout_marginStart="16dp"
@@ -666,8 +675,12 @@
                     android:max="100"
                     android:splitTrack="false"
                     android:progress="100"
-                    android:padding="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingEnd="8dp"
                     android:progressTint="@color/layout_setting_value_selected_text_color"
+                    android:background="@null"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -680,18 +693,18 @@
                     android:minHeight="0dp"
                     android:minWidth="0dp"
                     android:background="@drawable/custom_button_screen_filter_parent"
-                    android:src="@drawable/custom_button_screen_filter"
+                    android:src="@drawable/ic_moon_gr"
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true" />
             </RelativeLayout>
         </RelativeLayout>
     </RelativeLayout>
 
-    <!-- 상세설정 영역 -->
+    <!-- 상세설정 열기/닫기 -->
     <RelativeLayout
         android:id="@+id/ll_top_setting_bottom"
         android:layout_width="match_parent"
-        android:layout_height="61dp"
+        android:layout_height="64dp"
         android:background="@drawable/custom_layer_bottom_round"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -700,15 +713,25 @@
         <Button
             android:id="@+id/btnLayerExpand"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
             android:minHeight="0dp"
             android:minWidth="0dp"
-            android:drawableStart="@drawable/custom_button_setting_close"
+            android:drawableStart="@drawable/ic_arrow_down_gr"
             android:text="@string/layout_setting_detail_open"
             android:textSize="12dp"
             android:background="@android:color/transparent"
-            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
             android:textColor="@color/layout_setting_open_close"/>
+
+        <ImageView
+            android:id="@+id/iconSettingClose"
+            android:layout_width="32dp"
+            android:layout_height="4dp"
+            android:background="@drawable/custom_object_setting_handle"
+            android:layout_marginTop="20dp"
+            android:layout_below="@id/btnLayerExpand"
+            android:layout_centerHorizontal="true"/>
 
     </RelativeLayout>
 
